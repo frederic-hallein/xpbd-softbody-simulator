@@ -1,9 +1,6 @@
 #pragma once
 
 #include <string>
-#include <fstream>
-#include <sstream>
-#include <iostream>
 #include <glad.h>
 #include <glm/glm.hpp>
 #include <GLFW/glfw3.h>

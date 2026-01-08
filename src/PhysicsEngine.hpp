@@ -1,8 +1,5 @@
 #pragma once
 
-#include <iostream>
-#include <thread>
-#include <vector>
 #include <memory>
 #include <glad.h>
 #include <GLFW/glfw3.h>

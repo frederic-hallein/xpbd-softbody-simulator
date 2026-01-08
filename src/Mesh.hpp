@@ -3,20 +3,12 @@
 #include <string>
 #include <vector>
 #include <functional>
-#include <fstream>
-#include <sstream>
-#include <iostream>
 #include <glad.h>
 #include <glm/glm.hpp>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-#include <set>
 #include <map>
-
-
-#include "Transform.hpp"
-#include "Shader.hpp"
 
 
 class Object; // Forward declaration

@@ -1,10 +1,8 @@
 #pragma once
 
 #include <string>
-#include <vector>
 #include <glad.h>
 #include <stb_image.h>
-#include <iostream>
 
 class Texture
 {

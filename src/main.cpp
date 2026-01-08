@@ -1,7 +1,7 @@
 #include "PhysicsEngine.hpp"
 
-const int unsigned SCREEN_WIDTH = 1080;
-const int unsigned SCREEN_HEIGHT = 720;
+const unsigned int SCREEN_WIDTH = 1080;
+const unsigned int SCREEN_HEIGHT = 720;
 
 int main(int argc, char* argv[])
 {

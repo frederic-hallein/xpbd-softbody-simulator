@@ -14,12 +14,12 @@
 
 ### Dependencies
 
-- **C++20 Compiler** (e.g., g++ 10+, clang 10+)
-- **CMake** (3.10 or newer)
-- **OpenGL**
-- **GLFW**
-- **GLM**
-- **ASSIMP**
+- **C++20** compiler (GCC 10+/Clang 10+)
+- **CMake** 3.28.3 or newer
+- **OpenGL** development libraries
+- **GLFW3** development libraries
+- **Assimp** development libraries
+- **ImGui** (included in the repository)
 
 ### Ubuntu/Debian
 
