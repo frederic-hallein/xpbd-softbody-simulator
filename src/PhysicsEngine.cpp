@@ -6,11 +6,12 @@ PhysicsEngine::PhysicsEngine(
     const unsigned int screenWidth,
     const unsigned int screenHeight
 )
-    : m_screenWidth(screenWidth),
+    : m_engineName(engineName),
+      m_screenWidth(screenWidth),
       m_screenHeight(screenHeight)
 {
+    logger::debug("Running in DEBUG mode");
     logger::info("Initialize: {}", engineName);
-    logger::debug("Running in debug mode");
 
     // init GLFW window
     glfwInit();
@@ -66,6 +67,7 @@ void PhysicsEngine::handleEvents()
     if (glfwWindowShouldClose(m_window))
     {
         m_isRunning = false;
+        logger::info("Closing {}", m_engineName);
     }
 }
 
@@ -102,5 +104,6 @@ void PhysicsEngine::close()
     m_debugWindow->close();
     m_scene->clear();
     glfwTerminate();
-    logger::info("PhysicsEngine closed");
+
+    logger::info("{} closed successfully", m_engineName);
 }

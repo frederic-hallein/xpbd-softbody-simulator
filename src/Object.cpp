@@ -59,12 +59,12 @@ Object::Object(
         m_mesh.constructVolumeConstraints(k);
     }
 
-    logger::info("{} created", name);
+    logger::info("    - Created '{}' object successfully", name);
 }
 
 Object::~Object()
 {
-    logger::info("{} destroyed", m_name);
+    logger::info("- Destroyed {} successfully", m_name);
 }
 
 void Object::update(float deltaTime)

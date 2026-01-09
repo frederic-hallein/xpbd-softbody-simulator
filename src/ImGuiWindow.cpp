@@ -16,7 +16,7 @@ ImGuiWindow::ImGuiWindow(GLFWwindow* window, const char* glslVersion)
     ImGui_ImplOpenGL3_Init(glslVersion);
     ImGui::StyleColorsDark();
 
-    logger::info("ImGuiWindow created");
+    logger::info("ImGuiWindow created successfully");
 }
 
 void ImGuiWindow::newFrame()
@@ -42,7 +42,7 @@ void ImGuiWindow::close()
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 
-    logger::info("ImGuiWindow closed");
+    logger::info("ImGuiWindow closed successfully");
 }
 
 DebugWindow::DebugWindow(

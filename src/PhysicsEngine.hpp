@@ -35,5 +35,6 @@ private:
     std::unique_ptr<Scene> m_scene;
 
 private:
+    const char* m_engineName;
     static void framebufferSizeCallback(GLFWwindow* window, int width, int height) { glViewport(0, 0, width, height); }
 };

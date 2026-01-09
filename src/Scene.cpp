@@ -8,7 +8,7 @@ Shader Object::s_vertexNormalShader;
 Shader Object::s_faceNormalShader;
 
 const std::string RESOURCE_PATH = "../res/";
-const std::string CONFIG_PATH = "../config/";
+const std::string SCENES_PATH = "../scenes/";
 
 std::unique_ptr<Camera> Scene::createCamera(GLFWwindow* window, unsigned int screenWidth, unsigned int screenHeight)
 {
@@ -31,6 +31,7 @@ std::unique_ptr<Camera> Scene::createCamera(GLFWwindow* window, unsigned int scr
 
 std::unique_ptr<ShaderManager> Scene::loadShaders()
 {
+    logger::info("- Loading shaders...");
     auto shaderManager = std::make_unique<ShaderManager>();
     std::vector<std::unique_ptr<Shader>> shaders;
 
@@ -47,9 +48,9 @@ std::unique_ptr<ShaderManager> Scene::loadShaders()
         std::string fshPath = std::string(RESOURCE_PATH) + "shaders/" + fsh;
         try {
             shaders.push_back(std::make_unique<Shader>(name, vshPath.c_str(), fshPath.c_str()));
-            logger::info("Shader loaded: {}", name);
+            logger::info("  - Loaded '{}' shader successfully", name);
         } catch (const std::exception& e) {
-            logger::error("Failed to load shader {} : {}", name, e.what());
+            logger::error("Failed to load '{}' shader: {}", name, e.what());
         }
     }
 
@@ -59,6 +60,7 @@ std::unique_ptr<ShaderManager> Scene::loadShaders()
 
 std::unique_ptr<MeshManager> Scene::loadMeshes()
 {
+    logger::info("- Loading meshes...");
     auto meshManager = std::make_unique<MeshManager>();
     std::vector<std::unique_ptr<Mesh>> meshes;
 
@@ -71,9 +73,9 @@ std::unique_ptr<MeshManager> Scene::loadMeshes()
         std::string meshPath = std::string(RESOURCE_PATH) + "meshes/" + filename;
         try {
             meshes.push_back(std::make_unique<Mesh>(name, meshPath.c_str()));
-            logger::info("Mesh loaded: {}", name);
+            logger::info("  - Loaded '{}' mesh successfully", name);
         } catch (const std::exception& e) {
-            logger::error("Failed to load mesh {} : {}", name, e.what());
+            logger::error("Failed to load mesh '{}' : {}", name, e.what());
         }
     }
 
@@ -83,6 +85,7 @@ std::unique_ptr<MeshManager> Scene::loadMeshes()
 
 std::unique_ptr<TextureManager> Scene::loadTextures()
 {
+    logger::info("- Loading textures...");
     auto textureManager = std::make_unique<TextureManager>();
     std::vector<std::unique_ptr<Texture>> textures;
 
@@ -94,9 +97,9 @@ std::unique_ptr<TextureManager> Scene::loadTextures()
         std::string texturePath = std::string(RESOURCE_PATH) + "textures/" + filename;
         try {
             textures.push_back(std::make_unique<Texture>(name, texturePath.c_str()));
-            logger::info("Texture loaded: {}", name);
+            logger::info("  - Loaded '{}' texture successfully", name);
         } catch (const std::exception& e) {
-            logger::error("Failed to load texture {} : {}", name, e.what());
+            logger::error("Failed to load texture '{}' : {}", name, e.what());
         }
     }
 
@@ -106,6 +109,7 @@ std::unique_ptr<TextureManager> Scene::loadTextures()
 
 void Scene::loadResources()
 {
+    logger::info("Loading resources...");
     m_shaderManager = loadShaders();
     m_meshManager = loadMeshes();
     m_textureManager = loadTextures();
@@ -125,46 +129,53 @@ std::unique_ptr<Object> Scene::createObject(const ObjectConfig& config)
 
     auto shaderOpt = m_shaderManager->getResource(config.shaderName);
     if (!shaderOpt) {
-        logger::error("Shader '{}' not found for object '{}'", config.shaderName, config.name);
+        logger::error("    - Shader '{}' not found for object '{}'", config.shaderName, config.name);
         return nullptr;
     }
 
     auto meshOpt = m_meshManager->getResource(config.meshName);
     if (!meshOpt) {
-        logger::error("Mesh '{}' not found for object '{}'", config.meshName, config.name);
+        logger::error("    - Mesh '{}' not found for object '{}'", config.meshName, config.name);
         return nullptr;
     }
 
+    std::optional<std::reference_wrapper<Texture>> textureOpt;
     if (!config.textureName.empty()) {
-        auto textureOpt = m_textureManager->getResource(config.textureName);
-        if (textureOpt) {
-            return std::make_unique<Object>(
-                config.name,
-                transform,
-                m_k,
-                shaderOpt->get(),
-                meshOpt->get(),
-                textureOpt->get(),
-                config.isStatic
-            );
-        } else {
-            logger::error("Texture '{}' not found for object '{}'", config.textureName, config.name);
+        textureOpt = m_textureManager->getResource(config.textureName);
+        if (!textureOpt) {
+            logger::error("    - Texture '{}' not found for object '{}'", config.textureName, config.name);
+            return nullptr;
         }
+    } else {
+        logger::warning(" - Texture intentionally left empty for object '{}'", config.name);
     }
 
-    return std::make_unique<Object>(
-        config.name,
-        transform,
-        m_k,
-        shaderOpt->get(),
-        meshOpt->get(),
-        std::nullopt,
-        config.isStatic
-    );
+    if (textureOpt) {
+        return std::make_unique<Object>(
+            config.name,
+            transform,
+            m_k,
+            shaderOpt->get(),
+            meshOpt->get(),
+            textureOpt->get(),
+            config.isStatic
+        );
+    } else {
+        return std::make_unique<Object>(
+            config.name,
+            transform,
+            m_k,
+            shaderOpt->get(),
+            meshOpt->get(),
+            std::nullopt,
+            config.isStatic
+        );
+    }
 }
 
 void Scene::loadSceneConfig(const std::string& configPath)
 {
+    logger::info("- Load scene config...");
     std::ifstream configFile(configPath);
     if (!configFile.is_open()) {
         logger::error("Failed to open scene config: {}", configPath);
@@ -180,17 +191,18 @@ void Scene::loadSceneConfig(const std::string& configPath)
     auto faceNormalShaderOpt = m_shaderManager->getResource("faceNormal");
 
     if (!vertexNormalShaderOpt) {
-        logger::error("Failed to load vertexNormal shader for Object");
+        logger::error("Failed to load 'vertexNormal' shader for all objects");
     } else {
         Object::setVertexNormalShader(vertexNormalShaderOpt->get());
     }
 
     if (!faceNormalShaderOpt) {
-        logger::error("Failed to load faceNormal shader for Object");
+        logger::error("Failed to load 'faceNormal' shader for all objects");
     } else {
         Object::setFaceNormalShader(faceNormalShaderOpt->get());
     }
 
+    logger::info("  - Creating scene objects...");
     for (const auto& config : objectConfigs) {
         auto obj = createObject(config);
         if (obj) {
@@ -275,9 +287,9 @@ Scene::Scene(
         m_k(1.0f)
 {
     loadResources();
-    loadSceneConfig(CONFIG_PATH + "/test_scene.yaml");
+    loadSceneConfig(SCENES_PATH + "/test_scene.yaml");
     setupEnvCollisionConstraints();
-    logger::info("{} created", name);
+    logger::info("{} created successfully", name);
 }
 
 void Scene::applyGravity(
@@ -623,10 +635,11 @@ void Scene::render()
 
 void Scene::clear()
 {
+    logger::info("Clearing {}...", m_name);
     m_textureManager->deleteAllResources();
     m_meshManager->deleteAllResources();
     m_shaderManager->deleteAllResources();
     m_objects.clear();
 
-    logger::info("{} cleared.", m_name);
+    logger::info("{} cleared successfully", m_name);
 }

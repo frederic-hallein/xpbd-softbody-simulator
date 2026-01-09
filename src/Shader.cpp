@@ -14,7 +14,9 @@ static void checkCompileErrors(unsigned int shader, std::string type)
         if (!success)
         {
             glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-            logger::error("Shader: Shader compilation Error of type: {} \n {}", type, infoLog);
+            std::string errorMsg = "Shader compilation error of type: " + type + " : " + infoLog;
+            logger::error("{}", errorMsg);
+            throw std::runtime_error(errorMsg);
         }
     }
     else
@@ -23,14 +25,18 @@ static void checkCompileErrors(unsigned int shader, std::string type)
         if (!success)
         {
             glGetProgramInfoLog(shader, 1024, NULL, infoLog);
-            logger::error("Shader: Program linking Error of type: {} \n {}", type, infoLog);
-
+            std::string errorMsg = "Program linking error of type: " + type + " : " + infoLog;
+            logger::error("{}", errorMsg);
+            throw std::runtime_error(errorMsg);
         }
     }
 }
 
-static void getVertexAndFragmentSourceCode(const std::string& vertexPath, const std::string& fragmentPath,
-                                           std::string& vShaderCode, std::string& fShaderCode)
+static void getVertexAndFragmentSourceCode(
+    const std::string& vertexPath,
+    const std::string& fragmentPath,
+    std::string& vShaderCode,
+    std::string& fShaderCode)
 {
     std::ifstream vShaderFile;
     std::ifstream fShaderFile;
@@ -60,7 +66,8 @@ static void getVertexAndFragmentSourceCode(const std::string& vertexPath, const 
     }
     catch (std::ifstream::failure& e)
     {
-        std::cerr << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ: " << e.what() << std::endl;
+        std::string errorMsg = std::string("Shader file not successfully read: ") + e.what();
+        throw std::runtime_error(errorMsg);
     }
 }
 
