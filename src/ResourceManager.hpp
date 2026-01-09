@@ -4,7 +4,7 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <stdexcept>
+#include <optional>
 
 template<typename Resource>
 class ResourceManager {
@@ -17,14 +17,14 @@ public:
         }
     }
 
-    Resource& getResource(const std::string& name)
+    std::optional<std::reference_wrapper<Resource>> getResource(const std::string& name)
     {
         auto it = m_resources.find(name);
         if (it == m_resources.end())
         {
-            throw std::runtime_error("ResourceManager: Resource '" + name + "' not found!");
+            return std::nullopt;
         }
-        return *(it->second);
+        return std::reference_wrapper<Resource>(*(it->second));
     }
 
     void deleteAllResources()

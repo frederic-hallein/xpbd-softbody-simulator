@@ -1,6 +1,6 @@
 # XPBD Softbody Implementation
 
-## Description
+## Description [TODO: update]
 
 **XPBD Softbody Implementation** is a physics algorithm implementation written in C++ using OpenGL for rendering. The project focuses on simulating softbody dynamics using **Extended Position Based Dynamics (XPBD)** ([Macklin et al., 2019](https://matthias-research.github.io/pages/publications/smallsteps.pdf)), enabling realistic and efficient softbody physics.
 
@@ -19,18 +19,19 @@
 - **OpenGL** development libraries
 - **GLFW3** development libraries
 - **Assimp** development libraries
+- **yaml-cpp** development libraries
 - **ImGui** (included in the repository)
 
 ### Ubuntu/Debian
 
 ```sh
 sudo apt-get update
-sudo apt-get install build-essential cmake libassimp-dev libglm-dev libglfw3-dev libglew-dev
+sudo apt-get install build-essential cmake libassimp-dev libglm-dev libglfw3-dev libglew-dev libyaml-cpp-dev
 ```
 
 1. **Clone the repository:**
     ```sh
-    git clone --recursive https://github.com/frederic-hallein/xpbd-softbody-implementation.git
+    git clone https://github.com/frederic-hallein/xpbd-softbody-implementation.git
     ```
 
 2. **Enter the project directory:**
@@ -58,11 +59,6 @@ sudo apt-get install build-essential cmake libassimp-dev libglm-dev libglfw3-dev
     ```sh
     ./xpbd-softbody
     ```
-
-**Note:** Use `--recursive` flag when cloning to automatically fetch all submodules (including nlohmann_json). If you already cloned without it, run:
-```sh
-git submodule update --init --recursive
-```
 
 ---
 

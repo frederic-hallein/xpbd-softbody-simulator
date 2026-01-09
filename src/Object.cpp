@@ -1,5 +1,4 @@
-#include <iostream>
-
+#include "logger.hpp"
 #include "Object.hpp"
 
 Object::Object(
@@ -60,12 +59,12 @@ Object::Object(
         m_mesh.constructVolumeConstraints(k);
     }
 
-    std::cout << name << " created." << '\n';
+    logger::info("{} created", name);
 }
 
 Object::~Object()
 {
-    std::cout << m_name << " destroyed." << '\n';
+    logger::info("{} destroyed", m_name);
 }
 
 void Object::update(float deltaTime)

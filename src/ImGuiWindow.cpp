@@ -1,8 +1,8 @@
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
-#include <iostream>
 
+#include "logger.hpp"
 #include "ImGuiWindow.hpp"
 
 ImGuiWindow::ImGuiWindow(GLFWwindow* window, const char* glslVersion)
@@ -15,6 +15,8 @@ ImGuiWindow::ImGuiWindow(GLFWwindow* window, const char* glslVersion)
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glslVersion);
     ImGui::StyleColorsDark();
+
+    logger::info("ImGuiWindow created");
 }
 
 void ImGuiWindow::newFrame()
@@ -40,7 +42,7 @@ void ImGuiWindow::close()
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 
-    std::cout << "ImGuiWindow closed.\n";
+    logger::info("ImGuiWindow closed");
 }
 
 DebugWindow::DebugWindow(

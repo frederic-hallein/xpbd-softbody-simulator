@@ -1,7 +1,7 @@
-#include <iostream>
 #include <fstream>
 #include <sstream>
 
+#include "logger.hpp"
 #include "Shader.hpp"
 
 static void checkCompileErrors(unsigned int shader, std::string type)
@@ -14,7 +14,7 @@ static void checkCompileErrors(unsigned int shader, std::string type)
         if (!success)
         {
             glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-            std::cout << "Shader: Shader Compilation Error of type: " << type << "\n" << infoLog << "\n";
+            logger::error("Shader: Shader compilation Error of type: {} \n {}", type, infoLog);
         }
     }
     else
@@ -23,7 +23,8 @@ static void checkCompileErrors(unsigned int shader, std::string type)
         if (!success)
         {
             glGetProgramInfoLog(shader, 1024, NULL, infoLog);
-            std::cout << "Shader: Program Linking Error of type: " << type << "\n" << infoLog << "\n";
+            logger::error("Shader: Program linking Error of type: {} \n {}", type, infoLog);
+
         }
     }
 }

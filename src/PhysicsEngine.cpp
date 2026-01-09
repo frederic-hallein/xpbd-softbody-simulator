@@ -1,5 +1,5 @@
+#include "logger.hpp"
 #include "PhysicsEngine.hpp"
-
 
 PhysicsEngine::PhysicsEngine(
     const char* engineName,
@@ -9,7 +9,8 @@ PhysicsEngine::PhysicsEngine(
     : m_screenWidth(screenWidth),
       m_screenHeight(screenHeight)
 {
-    std::cout << "Initialize: " << engineName << '\n';
+    logger::info("Initialize: {}", engineName);
+    logger::debug("Running in debug mode");
 
     // init GLFW window
     glfwInit();
@@ -21,7 +22,7 @@ PhysicsEngine::PhysicsEngine(
     if(m_window == NULL)
     {
         glfwTerminate();
-        std::cout << "Failed to create GLFW window" << '\n';
+        logger::error("Failed to create GLFW window");
     }
 
     glfwMakeContextCurrent(m_window);
@@ -29,14 +30,14 @@ PhysicsEngine::PhysicsEngine(
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         glfwTerminate();
-        std::cout << "Failed to load GLAD" << '\n';
+        logger::error("Failed to load GLAD");
     }
-    std::cout << "GLFW window created.\n";
+
+    logger::info("GLFW window created");
 
 
     // create timer
     m_timer = std::make_unique<Timer>();
-
 
     // adjust viewport when window resizing
     framebufferSizeCallback(m_window, screenWidth, screenHeight);
@@ -58,8 +59,6 @@ PhysicsEngine::PhysicsEngine(
 
     // create debug window
     m_debugWindow = std::make_unique<DebugWindow>(m_window, "#version 330");
-
-    std::cout << "ImGuiWindow created.\n";
 };
 
 void PhysicsEngine::handleEvents()
@@ -103,5 +102,5 @@ void PhysicsEngine::close()
     m_debugWindow->close();
     m_scene->clear();
     glfwTerminate();
-    std::cout << "PhysicsEngine closed.\n";
+    logger::info("PhysicsEngine closed");
 }

@@ -1,7 +1,7 @@
-#include <iostream>
 #include <fstream>
-#include <nlohmann/json.hpp>
+#include <yaml-cpp/yaml.h>
 
+#include "logger.hpp"
 #include "Scene.hpp"
 
 Shader Object::s_vertexNormalShader;
@@ -18,7 +18,7 @@ std::unique_ptr<Camera> Scene::createCamera(GLFWwindow* window, unsigned int scr
     float aspectRatio = static_cast<float>(screenWidth) / static_cast<float>(screenHeight);
 
     return std::make_unique<Camera>(
-        glm::vec3(0.0f, 25.0f, 80.0f),
+        glm::vec3(0.0f, 20.0f, 50.0f),
         glm::vec3(0.0f, 0.0f, -1.0f),
         glm::vec3(0.0f, 1.0f, 0.0f),
         FOV,
@@ -39,6 +39,7 @@ std::unique_ptr<ShaderManager> Scene::loadShaders()
         {"faceNormal", "faceNormal.vsh", "faceNormal.fsh"},
         {"platform", "platform.vsh", "platform.fsh"},
         {"dirtblock", "dirtblock.vsh", "dirtblock.fsh"},
+        {"sphere", "sphere.vsh", "sphere.fsh"},
     };
 
     for (const auto& [name, vsh, fsh] : shaderData) {
@@ -46,9 +47,9 @@ std::unique_ptr<ShaderManager> Scene::loadShaders()
         std::string fshPath = std::string(RESOURCE_PATH) + "shaders/" + fsh;
         try {
             shaders.push_back(std::make_unique<Shader>(name, vshPath.c_str(), fshPath.c_str()));
-            std::cout << "Shader loaded: " << name << '\n';
+            logger::info("Shader loaded: {}", name);
         } catch (const std::exception& e) {
-            std::cerr << "Failed to load shader " << name << ": " << e.what() << '\n';
+            logger::error("Failed to load shader {} : {}", name, e.what());
         }
     }
 
@@ -63,15 +64,16 @@ std::unique_ptr<MeshManager> Scene::loadMeshes()
 
     const std::vector<std::tuple<const char*, const char*>> meshData = {
         {"cube", "cube.obj"},
+        {"sphere", "sphere.obj"},
     };
 
     for (const auto& [name, filename] : meshData) {
         std::string meshPath = std::string(RESOURCE_PATH) + "meshes/" + filename;
         try {
             meshes.push_back(std::make_unique<Mesh>(name, meshPath.c_str()));
-            std::cout << "Mesh loaded: " << name << '\n';
+            logger::info("Mesh loaded: {}", name);
         } catch (const std::exception& e) {
-            std::cerr << "Failed to load mesh " << name << ": " << e.what() << '\n';
+            logger::error("Failed to load mesh {} : {}", name, e.what());
         }
     }
 
@@ -92,9 +94,9 @@ std::unique_ptr<TextureManager> Scene::loadTextures()
         std::string texturePath = std::string(RESOURCE_PATH) + "textures/" + filename;
         try {
             textures.push_back(std::make_unique<Texture>(name, texturePath.c_str()));
-            std::cout << "Texture loaded: " << name << '\n';
+            logger::info("Texture loaded: {}", name);
         } catch (const std::exception& e) {
-            std::cerr << "Failed to load texture " << name << ": " << e.what() << '\n';
+            logger::error("Failed to load texture {} : {}", name, e.what());
         }
     }
 
@@ -121,84 +123,112 @@ std::unique_ptr<Object> Scene::createObject(const ObjectConfig& config)
     transform.setModel(model);
     transform.setView(*m_camera);
 
-    Shader shader = m_shaderManager->getResource(config.shaderName);
-    Mesh mesh = m_meshManager->getResource(config.meshName);
-
-    if (config.hasTexture) {
-        Texture texture = m_textureManager->getResource(config.textureName);
-        return std::make_unique<Object>(
-            config.name,
-            transform,
-            m_k,
-            shader,
-            mesh,
-            texture,
-            config.isStatic
-        );
-    } else {
-        return std::make_unique<Object>(
-            config.name,
-            transform,
-            m_k,
-            shader,
-            mesh,
-            std::nullopt,
-            config.isStatic
-        );
+    auto shaderOpt = m_shaderManager->getResource(config.shaderName);
+    if (!shaderOpt) {
+        logger::error("Shader '{}' not found for object '{}'", config.shaderName, config.name);
+        return nullptr;
     }
+
+    auto meshOpt = m_meshManager->getResource(config.meshName);
+    if (!meshOpt) {
+        logger::error("Mesh '{}' not found for object '{}'", config.meshName, config.name);
+        return nullptr;
+    }
+
+    if (!config.textureName.empty()) {
+        auto textureOpt = m_textureManager->getResource(config.textureName);
+        if (textureOpt) {
+            return std::make_unique<Object>(
+                config.name,
+                transform,
+                m_k,
+                shaderOpt->get(),
+                meshOpt->get(),
+                textureOpt->get(),
+                config.isStatic
+            );
+        } else {
+            logger::error("Texture '{}' not found for object '{}'", config.textureName, config.name);
+        }
+    }
+
+    return std::make_unique<Object>(
+        config.name,
+        transform,
+        m_k,
+        shaderOpt->get(),
+        meshOpt->get(),
+        std::nullopt,
+        config.isStatic
+    );
 }
 
 void Scene::loadSceneConfig(const std::string& configPath)
 {
     std::ifstream configFile(configPath);
     if (!configFile.is_open()) {
-        std::cerr << "Failed to open scene config: " << configPath << '\n';
+        logger::error("Failed to open scene config: {}", configPath);
         return;
     }
 
-    nlohmann::json sceneJson;
-    configFile >> sceneJson;
+    YAML::Node sceneYaml = YAML::Load(configFile);
     configFile.close();
 
-    std::vector<ObjectConfig> objectConfigs = parseObjectConfigs(sceneJson);
+    std::vector<ObjectConfig> objectConfigs = parseObjectConfigs(sceneYaml);
 
-    Object::setVertexNormalShader(m_shaderManager->getResource("vertexNormal"));
-    Object::setFaceNormalShader(m_shaderManager->getResource("faceNormal"));
+    auto vertexNormalShaderOpt = m_shaderManager->getResource("vertexNormal");
+    auto faceNormalShaderOpt = m_shaderManager->getResource("faceNormal");
+
+    if (!vertexNormalShaderOpt) {
+        logger::error("Failed to load vertexNormal shader for Object");
+    } else {
+        Object::setVertexNormalShader(vertexNormalShaderOpt->get());
+    }
+
+    if (!faceNormalShaderOpt) {
+        logger::error("Failed to load faceNormal shader for Object");
+    } else {
+        Object::setFaceNormalShader(faceNormalShaderOpt->get());
+    }
 
     for (const auto& config : objectConfigs) {
-        m_objects.push_back(createObject(config));
+        auto obj = createObject(config);
+        if (obj) {
+            m_objects.push_back(std::move(obj));
+        } else {
+            logger::error("Failed to create object: {}", config.name);
+        }
     }
 }
 
-std::vector<ObjectConfig> Scene::parseObjectConfigs(const nlohmann::json& sceneJson)
+std::vector<ObjectConfig> Scene::parseObjectConfigs(const YAML::Node& sceneYaml)
 {
     std::vector<ObjectConfig> configs;
 
-    const auto& objectsJson = sceneJson["scene"]["objects"];
-    for (const auto& objJson : objectsJson) {
+    const auto& objectsYaml = sceneYaml["scene"]["objects"];
+    for (const auto& objYaml : objectsYaml) {
         ObjectConfig config;
-        config.name = objJson["name"];
+        config.name = objYaml["name"].as<std::string>();
         config.position = glm::vec3(
-            objJson["position"][0],
-            objJson["position"][1],
-            objJson["position"][2]
+            objYaml["position"][0].as<float>(),
+            objYaml["position"][1].as<float>(),
+            objYaml["position"][2].as<float>()
         );
         config.rotationAxis = glm::vec3(
-            objJson["rotationAxis"][0],
-            objJson["rotationAxis"][1],
-            objJson["rotationAxis"][2]
+            objYaml["rotationAxis"][0].as<float>(),
+            objYaml["rotationAxis"][1].as<float>(),
+            objYaml["rotationAxis"][2].as<float>()
         );
-        config.rotationDeg = objJson["rotationDeg"];
+        config.rotationDeg = objYaml["rotationDeg"].as<float>();
         config.scale = glm::vec3(
-            objJson["scale"][0],
-            objJson["scale"][1],
-            objJson["scale"][2]
+            objYaml["scale"][0].as<float>(),
+            objYaml["scale"][1].as<float>(),
+            objYaml["scale"][2].as<float>()
         );
-        config.shaderName = objJson["shader"];
-        config.meshName = objJson["mesh"];
-        config.textureName = objJson["texture"];
-        config.isStatic = objJson["isStatic"];
-        config.hasTexture = objJson["hasTexture"];
+        config.shaderName = objYaml["shader"].as<std::string>();
+        config.meshName = objYaml["mesh"].as<std::string>();
+        config.textureName = objYaml["texture"].as<std::string>();
+        config.isStatic = objYaml["isStatic"].as<bool>();
 
         configs.push_back(config);
     }
@@ -245,9 +275,9 @@ Scene::Scene(
         m_k(1.0f)
 {
     loadResources();
-    loadSceneConfig(CONFIG_PATH + "/test_scene.json");
+    loadSceneConfig(CONFIG_PATH + "/test_scene.yaml");
     setupEnvCollisionConstraints();
-    std::cout << name << " created.\n";
+    logger::info("{} created", name);
 }
 
 void Scene::applyGravity(
@@ -319,10 +349,10 @@ void Scene::solveDistanceConstraints(
     size_t gradCSize = distanceConstraints.gradC.size();
     if (edgesSize != gradCSize)
     {
-        std::cerr << "DistanceConstraints size mismatch:\n"
-                  << "constraints = " << CSize << ", "
-                  << "gradConstraints = " << gradCSize << ", "
-                  << "edgeVertices = " << edgesSize << std::endl;
+        logger::error("DistanceConstraints size mismatch:");
+        logger::error("constraints = {},", CSize);
+        logger::error("gradConstraints = {}", gradCSize);
+        logger::error("edgeVertices = {}", edgesSize);
         return;
     }
 
@@ -360,10 +390,10 @@ void Scene::solveVolumeConstraints(
     size_t gradCSize = volumeConstraints.gradC.size();
     if (trianglesSize != gradCSize)
     {
-        std::cerr << "VolumeConstraints size mismatch:\n"
-                  << "constraints = " << CSize << ", "
-                  << "gradConstraints = " << gradCSize << ", "
-                  << "triangleVertices = " << trianglesSize << std::endl;
+        logger::error("VolumeConstraints size mismatch:");
+        logger::error("constraints = {},", CSize);
+        logger::error("gradConstraints = {}", gradCSize);
+        logger::error("triangleVertices = {}", trianglesSize);
         return;
     }
 
@@ -402,7 +432,7 @@ void Scene::solveEnvCollisionConstraints(
 
         if (verticesSize != gradCSize)
         {
-            std::cerr << "EnvCollisionConstraints size mismatch in set " << setIdx << std::endl;
+            logger::error("EnvCollisionConstraints size mismatch in set {}", setIdx);
             continue;
         }
 
@@ -598,5 +628,5 @@ void Scene::clear()
     m_shaderManager->deleteAllResources();
     m_objects.clear();
 
-    std::cout << m_name << " cleared.\n";
+    logger::info("{} cleared.", m_name);
 }

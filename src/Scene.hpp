@@ -3,7 +3,7 @@
 #include <span>
 #include <string>
 #include <vector>
-#include <nlohmann/json.hpp>
+#include <yaml-cpp/yaml.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -91,7 +91,7 @@ private:
 
     void loadSceneConfig(const std::string& configPath);
     std::unique_ptr<Object> createObject(const ObjectConfig& config);
-    std::vector<ObjectConfig> parseObjectConfigs(const nlohmann::json& sceneJson);
+    std::vector<ObjectConfig> parseObjectConfigs(const YAML::Node& sceneYaml);
 
     void setupEnvCollisionConstraints();
     void applyGravity(

@@ -1,3 +1,6 @@
+#include <thread>
+
+#include "logger.hpp"
 #include "Timer.hpp"
 
 Timer::Timer()
@@ -6,6 +9,7 @@ Timer::Timer()
 {
     m_frameStart = std::chrono::high_resolution_clock::now();
     m_lastFrame = m_frameStart;
+    logger::info("Timer created");
 }
 
 void Timer::startFrame()

@@ -1,7 +1,6 @@
 #pragma once
+
 #include <chrono>
-#include <thread>
-#include <iostream>
 
 class Timer
 {
