@@ -42,8 +42,6 @@ Object::Object(
 
     if (!m_isStatic)
     {
-        m_polygonMode = GL_LINE;
-
         //create M array
         size_t n = m_vertexTransforms.size();
         m_M = std::vector<float>(n, 0.0f);

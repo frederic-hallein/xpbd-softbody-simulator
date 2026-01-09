@@ -1,5 +1,6 @@
 #pragma once
 
+#include <deque>
 #include <glm/glm.hpp>
 
 #include "Scene.hpp"
@@ -35,4 +36,19 @@ public:
         int frameDuration,
         Scene& scene
     );
+
+private:
+    void displayPerformance(int frameDuration);
+    void displayCamera(Camera* camera);
+    void displayExternalForces(Scene& scene);
+    void displayXPBDParameters(Scene& scene);
+    void displaySceneReset(Scene& scene);
+    void displayVertexTransforms(size_t objectIndex, const Object* object);
+    void displayPolygonMode(size_t objectIndex, Object* object);
+    void displayObjectPanel(size_t objectIndex, Object* object);
+    void displayVertexTransforms(size_t objectIndex, Object* object);
+    void displaySceneObjects(Scene& scene);
+
+private:
+    std::deque<float> m_fpsHistory;
 };

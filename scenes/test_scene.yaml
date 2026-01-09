@@ -1,12 +1,5 @@
 scene:
   name: Test Scene
-  camera:
-    position: [0.0, 25.0, 80.0]
-    forward: [0.0, 0.0, -1.0]
-    up: [0.0, 1.0, 0.0]
-    fov: 45.0
-    nearPlane: 0.1
-    farPlane: 150.0
   objects:
     # Ground platform
     - name: Platform
@@ -21,7 +14,7 @@ scene:
 
     # dirt block
     - name: Block
-      position: [0.0, 15.0, 0.0]
+      position: [-5.0, 15.0, 0.0]
       rotationAxis: [0.0, 1.0, 1.0]
       rotationDeg: 45.0
       scale: [1.0, 1.0, 1.0]
@@ -32,7 +25,7 @@ scene:
 
     # Sphere
     - name: Sphere
-      position: [10.0, 15.0, 0.0]
+      position: [5.0, 15.0, 0.0]
       rotationAxis: [0.0, 1.0, 1.0]
       rotationDeg: 45.0
       scale: [2.0, 2.0, 2.0]
