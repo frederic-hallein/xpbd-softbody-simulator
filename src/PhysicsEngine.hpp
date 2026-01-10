@@ -26,7 +26,7 @@ private:
     bool m_isRunning = true;
     const unsigned int m_screenWidth;
     const unsigned int m_screenHeight;
-    GLFWwindow* m_window;
+    GLFWwindow* m_window = nullptr;
 
     const int m_targetFPS = 60;
     std::unique_ptr<Timer> m_timer;

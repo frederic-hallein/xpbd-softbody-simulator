@@ -28,11 +28,16 @@ struct ObjectConfig
     bool hasTexture;
 };
 
+struct SceneConfig {
+    std::string name;
+    std::vector<ObjectConfig> objects;
+};
+
 class Scene
 {
 public:
     Scene(
-        const std::string& name,
+        const std::string& scenePath,
         GLFWwindow* window,
         unsigned int screenWidth,
         unsigned int screenHeight
@@ -91,7 +96,7 @@ private:
 
     void loadSceneConfig(const std::string& configPath);
     std::unique_ptr<Object> createObject(const ObjectConfig& config);
-    std::vector<ObjectConfig> parseObjectConfigs(const YAML::Node& sceneYaml);
+    SceneConfig parseSceneConfig(const YAML::Node& sceneYaml);
 
     void setupEnvCollisionConstraints();
     void applyGravity(
@@ -119,7 +124,7 @@ private:
     );
 
 private:
-    std::string m_name;
+    std::string m_name = "";
 
     std::unique_ptr<ShaderManager> m_shaderManager;
     std::unique_ptr<MeshManager> m_meshManager;

@@ -11,6 +11,7 @@ Transform::Transform()
 {
 }
 
+// defines how camera sees the scene
 void Transform::setProjection(const Camera& camera)
 {
     m_projection = glm::perspective(
@@ -21,11 +22,13 @@ void Transform::setProjection(const Camera& camera)
     );
 }
 
+// defines positions of the object
 void Transform::setModel(const glm::mat4& model)
 {
     m_model = model;
 }
 
+// defines the position of the camera
 void Transform::setView(const Camera& camera)
 {
     m_view = glm::lookAt(

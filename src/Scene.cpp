@@ -185,7 +185,8 @@ void Scene::loadSceneConfig(const std::string& configPath)
     YAML::Node sceneYaml = YAML::Load(configFile);
     configFile.close();
 
-    std::vector<ObjectConfig> objectConfigs = parseObjectConfigs(sceneYaml);
+    SceneConfig sceneConfig = parseSceneConfig(sceneYaml);
+    m_name = sceneConfig.name;
 
     auto vertexNormalShaderOpt = m_shaderManager->getResource("vertexNormal");
     auto faceNormalShaderOpt = m_shaderManager->getResource("faceNormal");
@@ -203,7 +204,7 @@ void Scene::loadSceneConfig(const std::string& configPath)
     }
 
     logger::info("  - Creating scene objects...");
-    for (const auto& config : objectConfigs) {
+    for (const auto& config : sceneConfig.objects) {
         auto obj = createObject(config);
         if (obj) {
             m_objects.push_back(std::move(obj));
@@ -213,39 +214,40 @@ void Scene::loadSceneConfig(const std::string& configPath)
     }
 }
 
-std::vector<ObjectConfig> Scene::parseObjectConfigs(const YAML::Node& sceneYaml)
+SceneConfig Scene::parseSceneConfig(const YAML::Node& sceneYaml)
 {
-    std::vector<ObjectConfig> configs;
+    SceneConfig config;
+    config.name = sceneYaml["scene"]["name"].as<std::string>();
 
     const auto& objectsYaml = sceneYaml["scene"]["objects"];
     for (const auto& objYaml : objectsYaml) {
-        ObjectConfig config;
-        config.name = objYaml["name"].as<std::string>();
-        config.position = glm::vec3(
+        ObjectConfig objConfig;
+        objConfig.name = objYaml["name"].as<std::string>();
+        objConfig.position = glm::vec3(
             objYaml["position"][0].as<float>(),
             objYaml["position"][1].as<float>(),
             objYaml["position"][2].as<float>()
         );
-        config.rotationAxis = glm::vec3(
+        objConfig.rotationAxis = glm::vec3(
             objYaml["rotationAxis"][0].as<float>(),
             objYaml["rotationAxis"][1].as<float>(),
             objYaml["rotationAxis"][2].as<float>()
         );
-        config.rotationDeg = objYaml["rotationDeg"].as<float>();
-        config.scale = glm::vec3(
+        objConfig.rotationDeg = objYaml["rotationDeg"].as<float>();
+        objConfig.scale = glm::vec3(
             objYaml["scale"][0].as<float>(),
             objYaml["scale"][1].as<float>(),
             objYaml["scale"][2].as<float>()
         );
-        config.shaderName = objYaml["shader"].as<std::string>();
-        config.meshName = objYaml["mesh"].as<std::string>();
-        config.textureName = objYaml["texture"].as<std::string>();
-        config.isStatic = objYaml["isStatic"].as<bool>();
+        objConfig.shaderName = objYaml["shader"].as<std::string>();
+        objConfig.meshName = objYaml["mesh"].as<std::string>();
+        objConfig.textureName = objYaml["texture"].as<std::string>();
+        objConfig.isStatic = objYaml["isStatic"].as<bool>();
 
-        configs.push_back(config);
+        config.objects.push_back(objConfig);
     }
 
-    return configs;
+    return config;
 }
 
 void Scene::setupEnvCollisionConstraints()
@@ -267,13 +269,12 @@ void Scene::setupEnvCollisionConstraints()
 }
 
 Scene::Scene(
-    const std::string& name,
+    const std::string& scenePath,
     GLFWwindow* window,
     unsigned int screenWidth,
     unsigned int screenHeight
 )
-    :   m_name(name),
-        m_camera(createCamera(window, screenWidth, screenHeight)),
+    :   m_camera(createCamera(window, screenWidth, screenHeight)),
         m_shaderManager(std::make_unique<ShaderManager>()),
         m_meshManager(std::make_unique<MeshManager>()),
         m_textureManager(std::make_unique<TextureManager>()),
@@ -287,9 +288,9 @@ Scene::Scene(
         m_k(1.0f)
 {
     loadResources();
-    loadSceneConfig(SCENES_PATH + "/test_scene.yaml");
+    loadSceneConfig(SCENES_PATH + scenePath);
     setupEnvCollisionConstraints();
-    logger::info("{} created successfully", name);
+    logger::info("{} created successfully", m_name);
 }
 
 void Scene::applyGravity(

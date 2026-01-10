@@ -4,6 +4,9 @@
 
 **XPBD Softbody Implementation** is a physics algorithm implementation written in C++ using OpenGL for rendering. The project focuses on simulating softbody dynamics using **Extended Position Based Dynamics (XPBD)** ([Macklin et al., 2019](https://matthias-research.github.io/pages/publications/smallsteps.pdf)), enabling realistic and efficient softbody physics.
 
+
+[TODO: add source https://learnopengl.com/]
+
 ## Visuals
 
 ![Physics Engine Screenshot](res/screenshots/readme-screenshot.png)

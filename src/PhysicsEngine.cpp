@@ -11,7 +11,7 @@ PhysicsEngine::PhysicsEngine(
       m_screenHeight(screenHeight)
 {
     logger::debug("Running in DEBUG mode");
-    logger::info("Initialize: {}", engineName);
+    logger::info("Initializing: {}", engineName);
 
     // init GLFW window
     glfwInit();
@@ -20,10 +20,10 @@ PhysicsEngine::PhysicsEngine(
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     m_window = glfwCreateWindow(screenWidth, screenHeight, engineName, NULL, NULL);
-    if(m_window == NULL)
+    if(!m_window)
     {
         glfwTerminate();
-        logger::error("Failed to create GLFW window");
+        throw std::runtime_error("Failed to create GLFW window");
     }
 
     glfwMakeContextCurrent(m_window);
@@ -31,7 +31,7 @@ PhysicsEngine::PhysicsEngine(
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         glfwTerminate();
-        logger::error("Failed to load GLAD");
+        throw std::runtime_error("Failed to load GLAD");
     }
 
     logger::info("GLFW window created");
@@ -51,12 +51,11 @@ PhysicsEngine::PhysicsEngine(
 
     // create scene
     m_scene = std::make_unique<Scene>(
-        "Test Scene",
+        "test_scene.yaml",
         m_window,
         screenWidth,
         screenHeight
     );
-
 
     // create debug window
     m_debugWindow = std::make_unique<DebugWindow>(m_window, "#version 330");
