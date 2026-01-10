@@ -95,7 +95,8 @@ Camera::Camera(
 
 void Camera::scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    if (ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow)) return;
+    ImGuiIO& io = ImGui::GetIO();
+    if (io.WantCaptureMouse) return;
 
     Camera* camera = static_cast<Camera*>(glfwGetWindowUserPointer(window));
     if (!camera) return;
@@ -106,7 +107,8 @@ void Camera::scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 
 void Camera::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 {
-    if (ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow)) return;
+    ImGuiIO& io = ImGui::GetIO();
+    if (io.WantCaptureMouse) return;
 
     if (button != GLFW_MOUSE_BUTTON_LEFT) return;
 

@@ -95,7 +95,7 @@ void Object::resetVertexTransforms()
     m_mesh.update();
 }
 
-// TODO : refactoring
+// TODO : remove all light related code
 void Object::render()
 {
     if (m_texture.has_value())

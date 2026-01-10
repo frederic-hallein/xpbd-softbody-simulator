@@ -1,3 +1,5 @@
+#include <backends/imgui_impl_glfw.h>
+
 #include "logger.hpp"
 #include "ResourceConfig.hpp"
 #include "PhysicsEngine.hpp"
@@ -133,15 +135,38 @@ Camera* PhysicsEngine::getCurrentCamera()
     return scene->getCamera();
 }
 
+// Forward to ImGui first, then to Camera
+static void GlfwScrollDispatcher(GLFWwindow* window, double xoffset, double yoffset)
+{
+    ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
+    Camera::scrollCallback(window, xoffset, yoffset);
+}
+
+static void GlfwMouseButtonDispatcher(GLFWwindow* window, int button, int action, int mods)
+{
+    ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
+    Camera::mouseButtonCallback(window, button, action, mods);
+}
+
+static void GlfwCursorPosDispatcher(GLFWwindow* window, double xpos, double ypos)
+{
+    ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
+    Camera::cursorPosCallback(window, xpos, ypos);
+}
+
 void PhysicsEngine::setupCameraCallbacks()
 {
     Camera* camera = getCurrentCamera();
     if (!camera) return;
 
-    glfwSetWindowUserPointer(m_window, camera); // stores camera pointer
-    glfwSetScrollCallback(m_window, Camera::scrollCallback);
-    glfwSetMouseButtonCallback(m_window, Camera::mouseButtonCallback);
-    glfwSetCursorPosCallback(m_window, Camera::cursorPosCallback);
+    glfwSetWindowUserPointer(m_window, camera);
+
+    glfwSetScrollCallback(m_window, GlfwScrollDispatcher);
+    glfwSetMouseButtonCallback(m_window, GlfwMouseButtonDispatcher);
+    glfwSetCursorPosCallback(m_window, GlfwCursorPosDispatcher);
+
+    glfwSetKeyCallback(m_window, ImGui_ImplGlfw_KeyCallback);
+    glfwSetCharCallback(m_window, ImGui_ImplGlfw_CharCallback);
 }
 
 PhysicsEngine::PhysicsEngine(
