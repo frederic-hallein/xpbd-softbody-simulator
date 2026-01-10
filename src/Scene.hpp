@@ -25,7 +25,6 @@ struct ObjectConfig
     std::string meshName;
     std::string textureName;
     bool isStatic;
-    bool hasTexture;
 };
 
 struct SceneConfig {
@@ -37,11 +36,15 @@ class Scene
 {
 public:
     Scene(
-        const std::string& scenePath,
         GLFWwindow* window,
         unsigned int screenWidth,
-        unsigned int screenHeight
+        unsigned int screenHeight,
+        ShaderManager* shaderManager,
+        MeshManager* meshManager,
+        TextureManager* textureManager
     );
+
+    void loadSceneConfig(const std::string& configPath);
 
     void update(float deltaTime);
     void render();
@@ -87,14 +90,13 @@ public:
     float& getOverpressureFactor() { return m_k; }
 
 private:
-    void loadResources();
-    std::unique_ptr<ShaderManager> loadShaders();
-    std::unique_ptr<MeshManager> loadMeshes();
-    std::unique_ptr<TextureManager> loadTextures();
+    // void loadResources();
+    // std::unique_ptr<ShaderManager> loadShaders();
+    // std::unique_ptr<MeshManager> loadMeshes();
+    // std::unique_ptr<TextureManager> loadTextures();
 
     std::unique_ptr<Camera> createCamera(GLFWwindow* window, unsigned int screenWidth, unsigned int screenHeight);
 
-    void loadSceneConfig(const std::string& configPath);
     std::unique_ptr<Object> createObject(const ObjectConfig& config);
     SceneConfig parseSceneConfig(const YAML::Node& sceneYaml);
 
@@ -126,9 +128,13 @@ private:
 private:
     std::string m_name = "";
 
-    std::unique_ptr<ShaderManager> m_shaderManager;
-    std::unique_ptr<MeshManager> m_meshManager;
-    std::unique_ptr<TextureManager> m_textureManager;
+    // std::unique_ptr<ShaderManager> m_shaderManager;
+    // std::unique_ptr<MeshManager> m_meshManager;
+    // std::unique_ptr<TextureManager> m_textureManager;
+
+    ShaderManager* m_shaderManager;
+    MeshManager* m_meshManager;
+    TextureManager* m_textureManager;
 
     std::unique_ptr<Camera> m_camera;
 

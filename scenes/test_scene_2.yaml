@@ -1,0 +1,13 @@
+scene:
+  name: Test Scene 2
+  objects:
+    # Ground platform
+    - name: Platform
+      position: [0.0, -0.5, 0.0]
+      rotationAxis: [0.0, 0.0, 1.0]
+      rotationDeg: 45.0
+      scale: [20.0, 0.5, 20.0]
+      shader: platform
+      mesh: cube
+      texture: ""
+      isStatic: true

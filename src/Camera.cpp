@@ -1,15 +1,23 @@
 #include "Camera.hpp"
 
-void scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+
+void Camera::move()
 {
-    // Prevent camera scroll if interacting with ImGui
-    if (ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow)) return;
+    // float cameraSpeed = 30.0f * m_deltaTime;
 
-    Camera* camera = static_cast<Camera*>(glfwGetWindowUserPointer(window));
-    if (!camera) return;
+    // if (glfwGetKey(m_window, GLFW_KEY_A) == GLFW_PRESS)
+    //     m_cameraPos -= glm::normalize(glm::cross(m_cameraFront, m_cameraUp)) * cameraSpeed;
+    // if (glfwGetKey(m_window, GLFW_KEY_D) == GLFW_PRESS)
+    //     m_cameraPos += glm::normalize(glm::cross(m_cameraFront, m_cameraUp)) * cameraSpeed;
+    // if (glfwGetKey(m_window, GLFW_KEY_S) == GLFW_PRESS)
+    //     m_cameraPos -= glm::normalize(m_cameraFront) * cameraSpeed;
+    // if (glfwGetKey(m_window, GLFW_KEY_W) == GLFW_PRESS)
+    //     m_cameraPos += glm::normalize(m_cameraFront) * cameraSpeed;
 
-    float scrollSpeed = 150.0f * camera->m_deltaTime;
-    camera->setPosition(camera->getPosition() + camera->getFront() * static_cast<float>(yoffset) * scrollSpeed);
+    // if (glfwGetKey(m_window, GLFW_KEY_SPACE) == GLFW_PRESS)
+    //     m_cameraPos += m_cameraUp * cameraSpeed;
+    // if (glfwGetKey(m_window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+    //     m_cameraPos -= m_cameraUp * cameraSpeed;
 }
 
 void Camera::setOrbit()
@@ -24,29 +32,6 @@ void Camera::setOrbit()
     {
         m_orbitPitch = 0.0f;
         m_orbitYaw = 0.0f;
-    }
-}
-
-void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
-{
-    if (ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow)) return;
-
-    Camera* camera = static_cast<Camera*>(glfwGetWindowUserPointer(window));
-    if (!camera) return;
-
-    if (button == GLFW_MOUSE_BUTTON_LEFT) {
-        if (action == GLFW_PRESS) {
-            camera->m_isDragging = true;
-            double xpos, ypos;
-            glfwGetCursorPos(window, &xpos, &ypos);
-            camera->m_lastX = xpos;
-            camera->m_lastY = ypos;
-            camera->setOrbit();
-        }
-        else if (action == GLFW_RELEASE)
-        {
-            camera->m_isDragging = false;
-        }
     }
 }
 
@@ -66,22 +51,11 @@ void Camera::updateOrbit()
 
 }
 
-void cursorPosCallback(GLFWwindow* window, double xpos, double ypos)
+void Camera::updateOrbitAngles(float yawDelta, float pitchDelta)
 {
-    Camera* camera = static_cast<Camera*>(glfwGetWindowUserPointer(window));
-    if (!camera || !camera->m_isDragging) return;
-
-    float sensitivity = 0.01f;
-    float xoffset = static_cast<float>(xpos - camera->m_lastX);
-    float yoffset = static_cast<float>(ypos - camera->m_lastY);
-
-    camera->m_lastX = xpos;
-    camera->m_lastY = ypos;
-
-    camera->m_orbitYaw   -= xoffset * sensitivity;
-    camera->m_orbitPitch += yoffset * sensitivity;
-
-    camera->updateOrbit();
+    m_orbitYaw -= yawDelta;
+    m_orbitPitch += pitchDelta;
+    updateOrbit();
 }
 
 void Camera::resetPosition()
@@ -110,29 +84,54 @@ Camera::Camera(
       m_aspectRatio(aspectRatio),
       m_nearPlane(nearPlane),
       m_farPlane(farPlane),
-      m_window(window)
+      m_window(window),
+      m_scrollSpeed(150.0f),
+      m_mouseSensitivity(0.01),
+      m_isDragging(false),
+      m_lastX(0.0f),
+      m_lastY(0.0f)
 {
-    glfwSetWindowUserPointer(m_window, this);
-    glfwSetScrollCallback(m_window, scrollCallback);
-    glfwSetMouseButtonCallback(m_window, mouseButtonCallback);
-    glfwSetCursorPosCallback(m_window, cursorPosCallback);
 }
 
-// void Camera::move()
-// {
-//     float cameraSpeed = 30.0f * m_deltaTime;
+void Camera::scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    if (ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow)) return;
 
-//     if (glfwGetKey(m_window, GLFW_KEY_A) == GLFW_PRESS)
-//         m_cameraPos -= glm::normalize(glm::cross(m_cameraFront, m_cameraUp)) * cameraSpeed;
-//     if (glfwGetKey(m_window, GLFW_KEY_D) == GLFW_PRESS)
-//         m_cameraPos += glm::normalize(glm::cross(m_cameraFront, m_cameraUp)) * cameraSpeed;
-//     if (glfwGetKey(m_window, GLFW_KEY_S) == GLFW_PRESS)
-//         m_cameraPos -= glm::normalize(m_cameraFront) * cameraSpeed;
-//     if (glfwGetKey(m_window, GLFW_KEY_W) == GLFW_PRESS)
-//         m_cameraPos += glm::normalize(m_cameraFront) * cameraSpeed;
+    Camera* camera = static_cast<Camera*>(glfwGetWindowUserPointer(window));
+    if (!camera) return;
 
-//     if (glfwGetKey(m_window, GLFW_KEY_SPACE) == GLFW_PRESS)
-//         m_cameraPos += m_cameraUp * cameraSpeed;
-//     if (glfwGetKey(m_window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-//         m_cameraPos -= m_cameraUp * cameraSpeed;
-// }
+    float scrollAmount = camera->m_scrollSpeed * camera->m_deltaTime;
+    camera->setPosition(camera->getPosition() + camera->getFront() * static_cast<float>(yoffset) * scrollAmount);
+}
+
+void Camera::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+{
+    if (ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow)) return;
+
+    if (button != GLFW_MOUSE_BUTTON_LEFT) return;
+
+    Camera* camera = static_cast<Camera*>(glfwGetWindowUserPointer(window));
+    if (!camera) return;
+
+    if (action == GLFW_PRESS) {
+        camera->setDragging(true);
+        camera->setOrbit();
+        double x, y;
+        glfwGetCursorPos(window, &x, &y);
+        camera->setLastMousePos(x, y);
+    } else if (action == GLFW_RELEASE) {
+        camera->setDragging(false);
+    }
+}
+
+void Camera::cursorPosCallback(GLFWwindow* window, double xpos, double ypos)
+{
+    Camera* camera = static_cast<Camera*>(glfwGetWindowUserPointer(window));
+    if (!camera || !camera->isDragging()) return;
+
+    float xoffset = static_cast<float>(xpos - camera->m_lastX);
+    float yoffset = static_cast<float>(ypos - camera->m_lastY);
+
+    camera->setLastMousePos(xpos, ypos);
+    camera->updateOrbitAngles(xoffset * camera->m_mouseSensitivity, yoffset * camera->m_mouseSensitivity);
+}

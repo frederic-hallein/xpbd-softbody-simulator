@@ -254,7 +254,6 @@ void DebugWindow::update(
     displayExternalForces(scene);
     displayXPBDParameters(scene);
     displaySceneReset(scene);
-
     displaySceneObjects(scene);
 
     ImGui::End();

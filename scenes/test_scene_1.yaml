@@ -1,5 +1,5 @@
 scene:
-  name: Test Scene
+  name: Test Scene 1
   objects:
     # Ground platform
     - name: Platform

@@ -57,7 +57,7 @@ Object::Object(
         m_mesh.constructVolumeConstraints(k);
     }
 
-    logger::info("    - Created '{}' object successfully", name);
+    logger::info("  - Created '{}' object successfully", name);
 }
 
 Object::~Object()

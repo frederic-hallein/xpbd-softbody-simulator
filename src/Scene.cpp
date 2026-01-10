@@ -7,8 +7,7 @@
 Shader Object::s_vertexNormalShader;
 Shader Object::s_faceNormalShader;
 
-const std::string RESOURCE_PATH = "../res/";
-const std::string SCENES_PATH = "../scenes/";
+// const std::string RESOURCE_PATH = "../res/";
 
 std::unique_ptr<Camera> Scene::createCamera(GLFWwindow* window, unsigned int screenWidth, unsigned int screenHeight)
 {
@@ -29,94 +28,9 @@ std::unique_ptr<Camera> Scene::createCamera(GLFWwindow* window, unsigned int scr
     );
 }
 
-std::unique_ptr<ShaderManager> Scene::loadShaders()
-{
-    logger::info("- Loading shaders...");
-    auto shaderManager = std::make_unique<ShaderManager>();
-    std::vector<std::unique_ptr<Shader>> shaders;
-
-    const std::vector<std::tuple<const char*, const char*, const char*>> shaderData = {
-        {"vertexNormal", "vertexNormal.vsh", "vertexNormal.fsh"},
-        {"faceNormal", "faceNormal.vsh", "faceNormal.fsh"},
-        {"platform", "platform.vsh", "platform.fsh"},
-        {"dirtblock", "dirtblock.vsh", "dirtblock.fsh"},
-        {"sphere", "sphere.vsh", "sphere.fsh"},
-    };
-
-    for (const auto& [name, vsh, fsh] : shaderData) {
-        std::string vshPath = std::string(RESOURCE_PATH) + "shaders/" + vsh;
-        std::string fshPath = std::string(RESOURCE_PATH) + "shaders/" + fsh;
-        try {
-            shaders.push_back(std::make_unique<Shader>(name, vshPath.c_str(), fshPath.c_str()));
-            logger::info("  - Loaded '{}' shader successfully", name);
-        } catch (const std::exception& e) {
-            logger::error("Failed to load '{}' shader: {}", name, e.what());
-        }
-    }
-
-    shaderManager->addResources(std::move(shaders));
-    return shaderManager;
-}
-
-std::unique_ptr<MeshManager> Scene::loadMeshes()
-{
-    logger::info("- Loading meshes...");
-    auto meshManager = std::make_unique<MeshManager>();
-    std::vector<std::unique_ptr<Mesh>> meshes;
-
-    const std::vector<std::tuple<const char*, const char*>> meshData = {
-        {"cube", "cube.obj"},
-        {"sphere", "sphere.obj"},
-    };
-
-    for (const auto& [name, filename] : meshData) {
-        std::string meshPath = std::string(RESOURCE_PATH) + "meshes/" + filename;
-        try {
-            meshes.push_back(std::make_unique<Mesh>(name, meshPath.c_str()));
-            logger::info("  - Loaded '{}' mesh successfully", name);
-        } catch (const std::exception& e) {
-            logger::error("Failed to load mesh '{}' : {}", name, e.what());
-        }
-    }
-
-    meshManager->addResources(std::move(meshes));
-    return meshManager;
-}
-
-std::unique_ptr<TextureManager> Scene::loadTextures()
-{
-    logger::info("- Loading textures...");
-    auto textureManager = std::make_unique<TextureManager>();
-    std::vector<std::unique_ptr<Texture>> textures;
-
-    const std::vector<std::tuple<const char*, const char*>> textureData = {
-        {"dirtblock", "dirtblock.jpg"}
-    };
-
-    for (const auto& [name, filename] : textureData) {
-        std::string texturePath = std::string(RESOURCE_PATH) + "textures/" + filename;
-        try {
-            textures.push_back(std::make_unique<Texture>(name, texturePath.c_str()));
-            logger::info("  - Loaded '{}' texture successfully", name);
-        } catch (const std::exception& e) {
-            logger::error("Failed to load texture '{}' : {}", name, e.what());
-        }
-    }
-
-    textureManager->addResources(std::move(textures));
-    return textureManager;
-}
-
-void Scene::loadResources()
-{
-    logger::info("Loading resources...");
-    m_shaderManager = loadShaders();
-    m_meshManager = loadMeshes();
-    m_textureManager = loadTextures();
-}
-
 std::unique_ptr<Object> Scene::createObject(const ObjectConfig& config)
 {
+    logger::info("  - Creating '{}' object...", config.name);
     Transform transform;
     transform.setProjection(*m_camera);
 
@@ -175,7 +89,6 @@ std::unique_ptr<Object> Scene::createObject(const ObjectConfig& config)
 
 void Scene::loadSceneConfig(const std::string& configPath)
 {
-    logger::info("- Load scene config...");
     std::ifstream configFile(configPath);
     if (!configFile.is_open()) {
         logger::error("Failed to open scene config: {}", configPath);
@@ -203,7 +116,7 @@ void Scene::loadSceneConfig(const std::string& configPath)
         Object::setFaceNormalShader(faceNormalShaderOpt->get());
     }
 
-    logger::info("  - Creating scene objects...");
+    logger::info(" - Creating '{}' scene objects...", sceneConfig.name);
     for (const auto& config : sceneConfig.objects) {
         auto obj = createObject(config);
         if (obj) {
@@ -212,6 +125,8 @@ void Scene::loadSceneConfig(const std::string& configPath)
             logger::error("Failed to create object: {}", config.name);
         }
     }
+
+    setupEnvCollisionConstraints(); // TODO : move
 }
 
 SceneConfig Scene::parseSceneConfig(const YAML::Node& sceneYaml)
@@ -269,16 +184,18 @@ void Scene::setupEnvCollisionConstraints()
 }
 
 Scene::Scene(
-    const std::string& scenePath,
     GLFWwindow* window,
     unsigned int screenWidth,
-    unsigned int screenHeight
+    unsigned int screenHeight,
+    ShaderManager* shaderManager,
+    MeshManager* meshManager,
+    TextureManager* textureManager
 )
     :   m_camera(createCamera(window, screenWidth, screenHeight)),
-        m_shaderManager(std::make_unique<ShaderManager>()),
-        m_meshManager(std::make_unique<MeshManager>()),
-        m_textureManager(std::make_unique<TextureManager>()),
-        m_gravitationalAcceleration(0.0f),
+        m_shaderManager(shaderManager),
+        m_meshManager(meshManager),
+        m_textureManager(textureManager),
+        m_gravitationalAcceleration(0.0f, -9.81f, 0.0f),
         m_enableDistanceConstraints(true),
         m_enableVolumeConstraints(true),
         m_enableEnvCollisionConstraints(true),
@@ -287,10 +204,6 @@ Scene::Scene(
         m_beta(5.0f),
         m_k(1.0f)
 {
-    loadResources();
-    loadSceneConfig(SCENES_PATH + scenePath);
-    setupEnvCollisionConstraints();
-    logger::info("{} created successfully", m_name);
 }
 
 void Scene::applyGravity(
