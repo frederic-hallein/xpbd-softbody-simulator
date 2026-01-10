@@ -50,6 +50,7 @@ public:
     void render();
     void clear();
 
+    const std::string& getName() { return m_name; }
     Camera* getCamera() { return m_camera.get(); }
     const std::vector<std::unique_ptr<Object>>& getObjects() const { return m_objects; }
 
@@ -90,11 +91,6 @@ public:
     float& getOverpressureFactor() { return m_k; }
 
 private:
-    // void loadResources();
-    // std::unique_ptr<ShaderManager> loadShaders();
-    // std::unique_ptr<MeshManager> loadMeshes();
-    // std::unique_ptr<TextureManager> loadTextures();
-
     std::unique_ptr<Camera> createCamera(GLFWwindow* window, unsigned int screenWidth, unsigned int screenHeight);
 
     std::unique_ptr<Object> createObject(const ObjectConfig& config);
@@ -126,11 +122,7 @@ private:
     );
 
 private:
-    std::string m_name = "";
-
-    // std::unique_ptr<ShaderManager> m_shaderManager;
-    // std::unique_ptr<MeshManager> m_meshManager;
-    // std::unique_ptr<TextureManager> m_textureManager;
+    std::string m_name;
 
     ShaderManager* m_shaderManager;
     MeshManager* m_meshManager;

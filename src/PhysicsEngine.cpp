@@ -1,8 +1,10 @@
 #include "logger.hpp"
+#include "ResourceConfig.hpp"
 #include "PhysicsEngine.hpp"
 
 const std::string SCENES_PATH = "../scenes/";
 const std::string RESOURCE_PATH = "../res/";
+
 
 std::unique_ptr<ShaderManager> PhysicsEngine::loadShaders()
 {
@@ -10,22 +12,14 @@ std::unique_ptr<ShaderManager> PhysicsEngine::loadShaders()
     auto shaderManager = std::make_unique<ShaderManager>();
     std::vector<std::unique_ptr<Shader>> shaders;
 
-    const std::vector<std::tuple<const char*, const char*, const char*>> shaderData = {
-        {"vertexNormal", "vertexNormal.vsh", "vertexNormal.fsh"},
-        {"faceNormal", "faceNormal.vsh", "faceNormal.fsh"},
-        {"platform", "platform.vsh", "platform.fsh"},
-        {"dirtblock", "dirtblock.vsh", "dirtblock.fsh"},
-        {"sphere", "sphere.vsh", "sphere.fsh"},
-    };
-
-    for (const auto& [name, vsh, fsh] : shaderData) {
-        std::string vshPath = std::string(RESOURCE_PATH) + "shaders/" + vsh;
-        std::string fshPath = std::string(RESOURCE_PATH) + "shaders/" + fsh;
+    for (const auto& [name, vsh, fsh] : SHADER_DATA) {
+        std::string vshPath = std::string(RESOURCE_PATH) + "shaders/" + std::string(vsh);
+        std::string fshPath = std::string(RESOURCE_PATH) + "shaders/" + std::string(fsh);
         try {
-            shaders.push_back(std::make_unique<Shader>(name, vshPath.c_str(), fshPath.c_str()));
+            shaders.push_back(std::make_unique<Shader>(std::string(name).c_str(), vshPath.c_str(), fshPath.c_str()));
             logger::info("  - Loaded '{}' shader successfully", name);
         } catch (const std::exception& e) {
-            logger::error("- Failed to load '{}' shader: {}", name, e.what());
+            logger::error("Failed to load '{}' shader: {}", name, e.what());
         }
     }
 
@@ -39,18 +33,13 @@ std::unique_ptr<MeshManager> PhysicsEngine::loadMeshes()
     auto meshManager = std::make_unique<MeshManager>();
     std::vector<std::unique_ptr<Mesh>> meshes;
 
-    const std::vector<std::tuple<const char*, const char*>> meshData = {
-        {"cube", "cube.obj"},
-        {"sphere", "sphere.obj"},
-    };
-
-    for (const auto& [name, filename] : meshData) {
-        std::string meshPath = std::string(RESOURCE_PATH) + "meshes/" + filename;
+    for (const auto& [name, filename] : MESH_DATA) {
+        std::string meshPath = std::string(RESOURCE_PATH) + "meshes/" + std::string(filename);
         try {
-            meshes.push_back(std::make_unique<Mesh>(name, meshPath.c_str()));
+            meshes.push_back(std::make_unique<Mesh>(std::string(name).c_str(), meshPath.c_str()));
             logger::info("  - Loaded '{}' mesh successfully", name);
         } catch (const std::exception& e) {
-            logger::error("-Failed to load mesh '{}' : {}", name, e.what());
+            logger::error("Failed to load mesh '{}' : {}", name, e.what());
         }
     }
 
@@ -64,14 +53,10 @@ std::unique_ptr<TextureManager> PhysicsEngine::loadTextures()
     auto textureManager = std::make_unique<TextureManager>();
     std::vector<std::unique_ptr<Texture>> textures;
 
-    const std::vector<std::tuple<const char*, const char*>> textureData = {
-        {"dirtblock", "dirtblock.jpg"}
-    };
-
-    for (const auto& [name, filename] : textureData) {
-        std::string texturePath = std::string(RESOURCE_PATH) + "textures/" + filename;
+    for (const auto& [name, filename] : TEXTURE_DATA) {
+        std::string texturePath = std::string(RESOURCE_PATH) + "textures/" + std::string(filename);
         try {
-            textures.push_back(std::make_unique<Texture>(name, texturePath.c_str()));
+            textures.push_back(std::make_unique<Texture>(std::string(name).c_str(), texturePath.c_str()));
             logger::info("  - Loaded '{}' texture successfully", name);
         } catch (const std::exception& e) {
             logger::error("- Failed to load texture '{}' : {}", name, e.what());
@@ -122,7 +107,7 @@ void PhysicsEngine::switchScene(const std::string& sceneName)
 {
     auto it = m_scenes.find(sceneName);
     if (it == m_scenes.end()) {
-        logger::error("Scene '{}' not found", sceneName);
+        logger::error("Scene '{}' not found", sceneName); // TODO : better handle scene not found error
         return;
     }
 
@@ -202,24 +187,16 @@ PhysicsEngine::PhysicsEngine(
     framebufferSizeCallback(m_window, screenWidth, screenHeight);
     glfwSetFramebufferSizeCallback(m_window, framebufferSizeCallback);
 
-    // create resource manager
-    // auto shaderManager = std::make_unique<ShaderManager>();
-    // auto meshManager = std::make_unique<MeshManager>();
-    // auto textureManager = std::make_unique<TextureManager>();
-
     // create debug window
     m_debugWindow = std::make_unique<DebugWindow>(m_window, "#version 330");
 
     // load resources
     loadResources();
 
-    // create scene
+
+    // create and select first scene
     createScenes();
-
-    // select first scene
-    switchScene("Test Scene 1");
-
-    setupCameraCallbacks();
+    switchScene("Test Scene 1"); // TODO : couple with ImGui
 };
 
 void PhysicsEngine::handleEvents()
@@ -251,7 +228,7 @@ void PhysicsEngine::render()
             currentScene->render();
 
             m_debugWindow->newFrame();
-            m_debugWindow->update(m_timer->frameDuration, *currentScene); // TODO : debug broken ImGui
+            m_debugWindow->update(m_timer->frameDuration, *currentScene);
             m_debugWindow->render();
         }
 

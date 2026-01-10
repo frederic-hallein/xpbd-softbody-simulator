@@ -30,11 +30,20 @@ public:
     Camera* getCurrentCamera();
 
 private:
-    static constexpr std::array<std::pair<std::string_view, std::string_view>, 2> SCENE_LIST = {{
-        {"Test Scene 1", "test_scene_1.yaml"},
-        {"Test Scene 2", "test_scene_2.yaml"}
-    }};
+    static void framebufferSizeCallback(GLFWwindow* window, int width, int height) { glViewport(0, 0, width, height); }
 
+    void setupCameraCallbacks();
+
+    void loadResources();
+    std::unique_ptr<ShaderManager> loadShaders();
+    std::unique_ptr<MeshManager> loadMeshes();
+    std::unique_ptr<TextureManager> loadTextures();
+
+    void createScene(const std::string& sceneName, const std::string& scenePath);
+    void createScenes();
+    void switchScene(const std::string& sceneName);
+
+private:
     const char* m_engineName;
     bool m_isRunning = true;
     const unsigned int m_screenWidth;
@@ -52,18 +61,4 @@ private:
 
     std::unordered_map<std::string, std::unique_ptr<Scene>> m_scenes;
     std::string m_currentSceneName;
-
-private:
-    static void framebufferSizeCallback(GLFWwindow* window, int width, int height) { glViewport(0, 0, width, height); }
-
-    void setupCameraCallbacks();
-
-    void loadResources();
-    std::unique_ptr<ShaderManager> loadShaders();
-    std::unique_ptr<MeshManager> loadMeshes();
-    std::unique_ptr<TextureManager> loadTextures();
-
-    void createScene(const std::string& sceneName, const std::string& scenePath);
-    void createScenes();
-    void switchScene(const std::string& sceneName);
 };

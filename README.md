@@ -9,7 +9,7 @@
 
 ## Visuals
 
-![Physics Engine Screenshot](res/screenshots/readme-screenshot.png)
+![Physics Engine Screenshot](screenshots/readme-screenshot.png)
 
 ---
 

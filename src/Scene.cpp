@@ -11,6 +11,7 @@ Shader Object::s_faceNormalShader;
 
 std::unique_ptr<Camera> Scene::createCamera(GLFWwindow* window, unsigned int screenWidth, unsigned int screenHeight)
 {
+    // TODO : pass as parameters
     float FOV = 45.0f;
     float nearPlane = 0.1f;
     float farPlane = 150.0f;
@@ -191,7 +192,8 @@ Scene::Scene(
     MeshManager* meshManager,
     TextureManager* textureManager
 )
-    :   m_camera(createCamera(window, screenWidth, screenHeight)),
+    :   m_name(""),
+        m_camera(createCamera(window, screenWidth, screenHeight)),
         m_shaderManager(shaderManager),
         m_meshManager(meshManager),
         m_textureManager(textureManager),

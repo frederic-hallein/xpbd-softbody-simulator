@@ -26,10 +26,6 @@ void ImGuiWindow::newFrame()
     ImGui::NewFrame();
 }
 
-void ImGuiWindow::update()
-{
-}
-
 void ImGuiWindow::render()
 {
     ImGui::Render();
@@ -238,7 +234,14 @@ void DebugWindow::displaySceneObjects(Scene& scene)
     {
         Object* object = objects[i].get();
         int count = ++objectCounts[object->getName()];
-        displayObjectPanel(i, object);
+
+        std::string title = object->getName() + " " + std::to_string(count);
+
+        if (!ImGui::CollapsingHeader(title.c_str()))
+            continue;
+
+        displayVertexTransforms(i, object);
+        displayPolygonMode(i, object);
     }
 }
 

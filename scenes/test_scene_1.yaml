@@ -14,22 +14,11 @@ scene:
 
     # dirt block
     - name: Block
-      position: [-5.0, 15.0, 0.0]
+      position: [-0.0, 15.0, 0.0]
       rotationAxis: [0.0, 1.0, 1.0]
       rotationDeg: 45.0
-      scale: [1.0, 1.0, 1.0]
+      scale: [3.0, 3.0, 3.0]
       shader: dirtblock
       mesh: cube
       texture: dirtblock
-      isStatic: false
-
-    # Sphere
-    - name: Sphere
-      position: [5.0, 15.0, 0.0]
-      rotationAxis: [0.0, 1.0, 1.0]
-      rotationDeg: 45.0
-      scale: [2.0, 2.0, 2.0]
-      shader: sphere
-      mesh: sphere
-      texture: ""
       isStatic: false

@@ -43,7 +43,6 @@ private:
     void displayExternalForces(Scene& scene);
     void displayXPBDParameters(Scene& scene);
     void displaySceneReset(Scene& scene);
-    void displayVertexTransforms(size_t objectIndex, const Object* object);
     void displayPolygonMode(size_t objectIndex, Object* object);
     void displayObjectPanel(size_t objectIndex, Object* object);
     void displayVertexTransforms(size_t objectIndex, Object* object);
