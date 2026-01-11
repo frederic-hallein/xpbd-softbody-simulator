@@ -67,7 +67,6 @@ public:
         std::vector<Edge> edges;
         std::vector<Constraint> C;
         std::vector<ConstraintGradient> gradC;
-        std::vector<float> restLengths;
     };
     DistanceConstraints distanceConstraints;
 

@@ -253,8 +253,6 @@ void Mesh::constructDistanceConstraints()
             return glm::distance(x[v1], x[v2]) - d_0;
         });
 
-        distanceConstraints.restLengths.push_back(d_0);
-
         distanceConstraints.gradC.push_back([=](const std::vector<glm::vec3>& x) -> std::vector<glm::vec3> {
             glm::vec3 n = (x[v1] - x[v2]) / glm::distance(x[v1], x[v2]);
             return { n, -n };

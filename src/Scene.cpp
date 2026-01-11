@@ -326,6 +326,7 @@ void Scene::solveDistanceConstraints(
     }
 }
 
+// TODO : fixme
 void Scene::solveVolumeConstraints(
     std::vector<glm::vec3>& x,
     const std::vector<glm::vec3>& posDiff,
@@ -364,6 +365,7 @@ void Scene::solveVolumeConstraints(
     // }
 }
 
+// TODO : fixme
 void Scene::solveEnvCollisionConstraints(
     std::vector<glm::vec3>& x,
     const std::vector<glm::vec3>& posDiff,
