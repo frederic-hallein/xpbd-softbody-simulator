@@ -134,6 +134,10 @@ private:
 
     void applyGroundCollision(Object& object);
 
+    void updateObjectTransform(Object& object);
+    void updateObjectPhysics(Object& object, float deltaTime);
+    void updateObjects(float deltaTime);
+
 private:
     std::string m_name;
 

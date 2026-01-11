@@ -1,3 +1,5 @@
+#include <thread>
+#include <future>
 #include <fstream>
 #include <yaml-cpp/yaml.h>
 
@@ -537,25 +539,48 @@ void Scene::applyGroundCollision(Object& object)
     }
 }
 
+void Scene::updateObjectPhysics(Object& object, float deltaTime)
+{
+    if (!object.isStatic())
+    {
+        applyGravity(object, deltaTime);
+        applyXPBD(object, deltaTime);
+        applyGroundCollision(object);
+    }
+}
+
+void Scene::updateObjectTransform(Object& object)
+{
+    Transform& transform = object.getTransform();
+    transform.setView(*m_camera);
+}
+
+void Scene::updateObjects(float deltaTime)
+{
+    std::vector<std::future<void>> futures;
+    futures.reserve(m_objects.size());
+
+    for (size_t i = 0; i < m_objects.size(); ++i)
+    {
+        futures.push_back(
+            std::async(std::launch::async, [this, i, deltaTime]() {
+                auto& object = m_objects[i];
+                updateObjectTransform(*object);
+                updateObjectPhysics(*object, deltaTime);
+                object->update(deltaTime);
+            })
+        );
+    }
+
+    for (auto& future : futures) {
+        future.get();
+    }
+}
+
 void Scene::update(float deltaTime)
 {
     m_camera->setDeltaTime(deltaTime);
-
-    // gravity, XPBD, and ground collision
-    for (const auto& object : m_objects)
-    {
-        Transform& transform = object->getTransform();
-        transform.setView(*m_camera);
-
-        if (!object->isStatic())
-        {
-            applyGravity(*object, deltaTime);
-            applyXPBD(*object, deltaTime);
-            applyGroundCollision(*object);
-        }
-
-        object->update(deltaTime);
-    }
+    updateObjects(deltaTime);
 }
 
 void Scene::render()
