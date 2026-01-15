@@ -1,11 +1,10 @@
-#include <backends/imgui_impl_glfw.h>
+// #include <backends/imgui_impl_glfw.h>
 
 #include "logger.hpp"
 #include "ResourceConfig.hpp"
 #include "PhysicsEngine.hpp"
 
 const std::string RESOURCE_PATH = "../res/";
-
 
 
 std::unique_ptr<ShaderManager> PhysicsEngine::loadShaders()
@@ -78,52 +77,6 @@ void PhysicsEngine::loadResources()
     logger::info("Loaded resources successfully");
 }
 
-Camera* PhysicsEngine::getCurrentCamera()
-{
-    Scene* scene = m_sceneManager->getCurrentScene();
-    if (!scene) return nullptr;
-    return scene->getCamera();
-}
-
-void PhysicsEngine::switchScene(const std::string& sceneName)
-{
-    m_sceneManager->switchScene(sceneName);
-    setupCameraCallbacks();
-}
-
-static void GlfwScrollDispatcher(GLFWwindow* window, double xoffset, double yoffset)
-{
-    ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
-    Camera::scrollCallback(window, xoffset, yoffset);
-}
-
-static void GlfwMouseButtonDispatcher(GLFWwindow* window, int button, int action, int mods)
-{
-    ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
-    Camera::mouseButtonCallback(window, button, action, mods);
-}
-
-static void GlfwCursorPosDispatcher(GLFWwindow* window, double xpos, double ypos)
-{
-    ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
-    Camera::cursorPosCallback(window, xpos, ypos);
-}
-
-void PhysicsEngine::setupCameraCallbacks()
-{
-    Camera* camera = getCurrentCamera();
-    if (!camera) return;
-
-    glfwSetWindowUserPointer(m_window, camera);
-
-    glfwSetScrollCallback(m_window, GlfwScrollDispatcher);
-    glfwSetMouseButtonCallback(m_window, GlfwMouseButtonDispatcher);
-    glfwSetCursorPosCallback(m_window, GlfwCursorPosDispatcher);
-
-    glfwSetKeyCallback(m_window, ImGui_ImplGlfw_KeyCallback);
-    glfwSetCharCallback(m_window, ImGui_ImplGlfw_CharCallback);
-}
-
 PhysicsEngine::PhysicsEngine(
     const char* engineName,
     const unsigned int screenWidth,
@@ -187,8 +140,7 @@ PhysicsEngine::PhysicsEngine(
 
     // create and select first scene
     m_sceneManager->createScenes();
-    switchScene(std::string(SCENE_LIST[1].first));
-
+    m_sceneManager->switchScene(std::string(SCENE_LIST[0].first));
 };
 
 PhysicsEngine::~PhysicsEngine()
@@ -204,15 +156,33 @@ void PhysicsEngine::handleEvents()
     }
 }
 
-void processInput(GLFWwindow* window)
+void PhysicsEngine::processInput()
 {
-    if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
+    if(glfwGetKey(m_window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(m_window, true);
+
+    Camera* camera = m_sceneManager->getCurrentCamera();
+    if (camera) {
+        camera->setDeltaTime(m_timer->getDeltaTime());
+    }
+
+    // TODO : update camera controls
+    // Camera* camera = m_sceneManager->getCurrentCamera();
+    // if (camera) {
+    //     if (glfwGetKey(m_window, GLFW_KEY_W) == GLFW_PRESS)
+    //         camera->processKeyboard(FORWARD, m_timer->getDeltaTime());
+    //     if (glfwGetKey(m_window, GLFW_KEY_S) == GLFW_PRESS)
+    //         camera->processKeyboard(BACKWARD, m_timer->getDeltaTime());
+    //     if (glfwGetKey(m_window, GLFW_KEY_A) == GLFW_PRESS)
+    //         camera->processKeyboard(LEFT, m_timer->getDeltaTime());
+    //     if (glfwGetKey(m_window, GLFW_KEY_D) == GLFW_PRESS)
+    //         camera->processKeyboard(RIGHT, m_timer->getDeltaTime());
+    // }
 }
 
 void PhysicsEngine::update()
 {
-    processInput(m_window);
+    processInput();
     m_timer->startFrame();
 
     Scene* currentScene = m_sceneManager->getCurrentScene();

@@ -26,9 +26,10 @@ public:
     Scene* getCurrentScene();
     const std::string& getCurrentSceneName() const { return m_currentSceneName; }
     const std::unordered_map<std::string, std::unique_ptr<Scene>>& getAllScenes() const { return m_scenes; }
-
     void clearScenes();
 
+    Camera* getCurrentCamera();
+    void setupCameraCallbacks();
 private:
     void createScene(const std::string& sceneName, const std::string& sceneFilename);
 

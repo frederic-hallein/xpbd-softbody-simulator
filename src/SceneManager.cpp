@@ -1,6 +1,9 @@
+#include <backends/imgui_impl_glfw.h>
+
 #include "logger.hpp"
 #include "ResourceConfig.hpp"
 #include "SceneManager.hpp"
+
 
 SceneManager::SceneManager(
     GLFWwindow* window,
@@ -65,6 +68,7 @@ void SceneManager::switchScene(const std::string& sceneName)
     }
 
     m_currentSceneName = sceneName;
+    setupCameraCallbacks();
     logger::info("Switched to scene: {}", sceneName);
 }
 
@@ -74,4 +78,44 @@ void SceneManager::clearScenes()
     for (auto& [name, scene] : m_scenes) {
         scene->clear();
     }
+}
+
+Camera* SceneManager::getCurrentCamera()
+{
+    Scene* scene = getCurrentScene();
+    if (!scene) return nullptr;
+    return scene->getCamera();
+}
+
+static void GlfwScrollDispatcher(GLFWwindow* window, double xoffset, double yoffset)
+{
+    ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
+    Camera::scrollCallback(window, xoffset, yoffset);
+}
+
+static void GlfwMouseButtonDispatcher(GLFWwindow* window, int button, int action, int mods)
+{
+    ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
+    Camera::mouseButtonCallback(window, button, action, mods);
+}
+
+static void GlfwCursorPosDispatcher(GLFWwindow* window, double xpos, double ypos)
+{
+    ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
+    Camera::cursorPosCallback(window, xpos, ypos);
+}
+
+void SceneManager::setupCameraCallbacks()
+{
+    Camera* camera = getCurrentCamera();
+    if (!camera) return;
+
+    glfwSetWindowUserPointer(m_window, camera);
+
+    glfwSetScrollCallback(m_window, GlfwScrollDispatcher);
+    glfwSetMouseButtonCallback(m_window, GlfwMouseButtonDispatcher);
+    glfwSetCursorPosCallback(m_window, GlfwCursorPosDispatcher);
+
+    glfwSetKeyCallback(m_window, ImGui_ImplGlfw_KeyCallback);
+    glfwSetCharCallback(m_window, ImGui_ImplGlfw_CharCallback);
 }

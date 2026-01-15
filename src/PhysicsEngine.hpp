@@ -28,19 +28,18 @@ public:
     MeshManager* getMeshManager() const { return m_meshManager.get(); }
     TextureManager* getTextureManager() const { return m_textureManager.get(); }
 
-    Camera* getCurrentCamera();
     SceneManager* getSceneManager() const { return m_sceneManager.get(); }
     void switchScene(const std::string& sceneName);
 
 private:
     static void framebufferSizeCallback(GLFWwindow* window, int width, int height) { glViewport(0, 0, width, height); }
 
-    void setupCameraCallbacks();
-
     void loadResources();
     std::unique_ptr<ShaderManager> loadShaders();
     std::unique_ptr<MeshManager> loadMeshes();
     std::unique_ptr<TextureManager> loadTextures();
+
+    void processInput();
 
 private:
     const char* m_engineName;
@@ -52,10 +51,10 @@ private:
     std::unique_ptr<ShaderManager> m_shaderManager;
     std::unique_ptr<MeshManager> m_meshManager;
     std::unique_ptr<TextureManager> m_textureManager;
+    std::unique_ptr<SceneManager> m_sceneManager;
 
     const int m_targetFPS;
     std::unique_ptr<Timer> m_timer;
 
     std::unique_ptr<DebugWindow> m_debugWindow;
-    std::unique_ptr<SceneManager> m_sceneManager;
 };

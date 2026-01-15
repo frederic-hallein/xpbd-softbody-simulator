@@ -62,7 +62,7 @@ std::unique_ptr<Object> Scene::createObject(const ObjectConfig& config)
             return nullptr;
         }
     } else {
-        logger::warning(" - Texture intentionally left empty for object '{}'", config.name);
+        logger::warning("- Texture intentionally left empty for object '{}'", config.name);
     }
 
     if (textureOpt) {
