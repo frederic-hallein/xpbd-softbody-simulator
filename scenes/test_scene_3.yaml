@@ -1,0 +1,44 @@
+scene:
+  name: Test Scene 1
+  objects:
+    # # Platform
+    # - name: Platform
+    #   position: [0.0, -0.5, 0.0]
+    #   rotationAxis: [0.0, 0.0, 1.0]
+    #   rotationDeg: 0.0
+    #   scale: [50.0, 0.5, 50.0]
+    #   shader: platform
+    #   mesh: cube
+    #   texture: ""
+    #   isStatic: true
+
+    # Ground
+    - name: Ground
+      position: [0.0, 0.0, 0.0]
+      rotationAxis: [0.0, 0.0, 1.0]
+      rotationDeg: 180.0
+      scale: [1000.0, 1.0, 1000.0]
+      shader: ground
+      mesh: surface
+      texture: tile
+      isStatic: true
+
+    - name: Cone
+      position: [0.0, 10.0, 0.0]
+      rotationAxis: [0.0, 0.0, 1.0]
+      rotationDeg: 0.0
+      scale: [10.0, 10.0, 10.0]
+      shader: sphere
+      mesh: cone
+      texture: ""
+      isStatic: true
+
+    - name: Torus
+      position: [0.0, 30.0, 0.0]
+      rotationAxis: [0.0, 0.0, 1.0]
+      rotationDeg: 0.0
+      scale: [10.0, 10.0, 10.0]
+      shader: sphere
+      mesh: torus
+      texture: ""
+      isStatic: false

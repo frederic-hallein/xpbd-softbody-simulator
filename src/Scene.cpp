@@ -203,7 +203,7 @@ Scene::Scene(
         m_enableVolumeConstraints(false),
         m_enableEnvCollisionConstraints(false),
         m_xpbdSubsteps(1),
-        m_alpha(0.0f),
+        m_alpha(0.001f),
         m_beta(1.0f),
         m_k(1.0f)
 {
@@ -554,6 +554,7 @@ void Scene::updateObjects(float deltaTime)
     }
 }
 
+// TODO : pause simulation for non-active scenes
 void Scene::update(float deltaTime)
 {
     m_camera->setDeltaTime(deltaTime);
