@@ -6,10 +6,10 @@ scene:
       position: [0.0, 0.0, 0.0]
       rotationAxis: [0.0, 0.0, 1.0]
       rotationDeg: 180.0
-      scale: [50.0, 1.0, 50.0]
+      scale: [1000.0, 1.0, 1000.0]
       shader: ground
       mesh: surface
-      texture: checkerboard
+      texture: tile
       color: [1.0, 1.0, 1.0]
       isStatic: true
 

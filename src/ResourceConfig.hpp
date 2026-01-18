@@ -33,8 +33,9 @@ static constexpr std::array<std::pair<std::string_view, std::string_view>, 5> ME
 }};
 
 // Texture configuration
-static constexpr std::array<std::pair<std::string_view, std::string_view>, 3> TEXTURE_DATA = {{
+static constexpr std::array<std::pair<std::string_view, std::string_view>, 4> TEXTURE_DATA = {{
     {"dirtblock", "dirtblock.jpg"},
     {"checkerboard", "checkerboard.png"},
     {"tile", "tile.jpg"},
+    {"emoji", "emoji.jpeg"},
 }};

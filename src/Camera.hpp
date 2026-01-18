@@ -70,4 +70,7 @@ private:
     float m_orbitYaw;
     float m_orbitPitch;
     float m_orbitRadius;
+
+    // float m_yaw;
+    // float m_pitch;
 };

@@ -164,22 +164,28 @@ void PhysicsEngine::processInput()
     if(glfwGetKey(m_window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(m_window, true);
 
-    Camera* camera = m_sceneManager->getCurrentCamera();
-    if (camera) {
-        camera->setDeltaTime(m_timer->getDeltaTime());
-    }
-
-    // TODO : update camera controls
     // Camera* camera = m_sceneManager->getCurrentCamera();
     // if (camera) {
+    //     camera->setDeltaTime(m_timer->getDeltaTime());
+
+    //     float moveSpeed = 100.0f * m_timer->getDeltaTime();
+
+    //     glm::vec3 newPos = camera->getPosition();
+
     //     if (glfwGetKey(m_window, GLFW_KEY_W) == GLFW_PRESS)
-    //         camera->processKeyboard(FORWARD, m_timer->getDeltaTime());
+    //         newPos += camera->getFront() * moveSpeed;
     //     if (glfwGetKey(m_window, GLFW_KEY_S) == GLFW_PRESS)
-    //         camera->processKeyboard(BACKWARD, m_timer->getDeltaTime());
+    //         newPos -= camera->getFront() * moveSpeed;
     //     if (glfwGetKey(m_window, GLFW_KEY_A) == GLFW_PRESS)
-    //         camera->processKeyboard(LEFT, m_timer->getDeltaTime());
+    //         newPos -= camera->getRight() * moveSpeed;
     //     if (glfwGetKey(m_window, GLFW_KEY_D) == GLFW_PRESS)
-    //         camera->processKeyboard(RIGHT, m_timer->getDeltaTime());
+    //         newPos += camera->getRight() * moveSpeed;
+    //     if (glfwGetKey(m_window, GLFW_KEY_SPACE) == GLFW_PRESS)
+    //         newPos += camera->getUp() * moveSpeed;
+    //     if (glfwGetKey(m_window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+    //         newPos -= camera->getUp() * moveSpeed;
+
+    //     camera->setPosition(newPos);
     // }
 }
 
