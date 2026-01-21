@@ -38,6 +38,14 @@ struct SceneConfig {
 class Scene
 {
 public:
+    struct PickResult {
+        Object* object = nullptr;
+        Mesh::Triangle triangle;
+        glm::vec3 intersection;
+        bool hit = false;
+    };
+
+public:
     Scene(
         GLFWwindow* window,
         unsigned int screenWidth,
@@ -58,6 +66,23 @@ public:
     Camera* getCamera() { return m_camera.get(); }
     Light* getLight() { return m_light.get(); }
     const std::vector<std::unique_ptr<Object>>& getObjects() const { return m_objects; }
+
+    PickResult pickObject(
+        const glm::vec3& rayOrigin,
+        const glm::vec3& rayDir
+    );
+    void createMouseConstraints(const PickResult& pick);
+    void updateMouseConstraints(
+        const glm::vec3& cameraPos,
+        const glm::vec3& rayDir
+    );
+    void releaseMouseConstraints() { m_activeMouseConstraint.isActive = false; }
+    void solveMouseConstraints(
+        std::vector<glm::vec3>& x,
+        const std::vector<glm::vec3>& posDiff,
+        const std::vector<float>& M,
+        float deltaTime_s
+    );
 
     bool& enableDistanceConstraints() { return m_enableDistanceConstraints; }
     void solveDistanceConstraints(
@@ -96,55 +121,6 @@ public:
     float& getOverpressureFactor() { return m_k; }
 
 private:
-    std::unique_ptr<Camera> createCamera();
-    std::unique_ptr<Light> createLight();
-
-    std::unique_ptr<Object> createObject(const ObjectConfig& config);
-    SceneConfig parseSceneConfig(const YAML::Node& sceneYaml);
-
-    void setupEnvCollisionConstraints();
-    void applyGravity(
-        Object& object,
-        float deltaTime
-    );
-    float calculateDeltaLambda(
-        float C_j,
-        const std::vector<glm::vec3>& gradC_j,
-        const std::vector<glm::vec3>& posDiff,
-        std::span<const unsigned int> constraintVertices,
-        const std::vector<float>& M,
-        float alphaTilde,
-        float gamma
-    );
-    // std::vector<glm::vec3> calculateDeltaX(
-    //     float lambda,
-    //     const std::vector<float>& M,
-    //     std::vector<glm::vec3>& gradC_j,
-    //     std::span<const unsigned int> constraintVertices
-    // );
-    void setDeltaX(
-        std::vector<glm::vec3>& deltaX,
-        float deltaLambda,
-        const std::vector<float>& M,
-        const std::vector<glm::vec3>& gradC_j,
-        std::span<const unsigned int> constraintVertices
-    );
-    void updateConstraintPositions(
-        std::vector<glm::vec3>& x,
-        const std::vector<glm::vec3>& deltaX
-    );
-    void applyXPBD(
-        Object& object,
-        float deltaTime
-    );
-
-    void applyGroundCollision(Object& object);
-
-    void updateObjectTransform(Object& object);
-    void updateObjectPhysics(Object& object, float deltaTime, const glm::vec3& cameraPos, const glm::vec3& rayDir);
-    void updateObjects(float deltaTime, const glm::vec3& cameraPos, const glm::vec3& rayDir);
-
-private:
     std::string m_name;
     GLFWwindow* m_window;
     unsigned int m_screenWidth;
@@ -164,6 +140,15 @@ private:
 
     int m_xpbdSubsteps;
 
+    struct ActiveMouseConstraint {
+        bool isActive = false;
+        Object* object = nullptr;
+        Mesh::Triangle triangle;
+        glm::vec3 intersectionPoint;
+        std::array<float, 3> initialDistances;
+    };
+    ActiveMouseConstraint m_activeMouseConstraint;
+
     bool m_enableDistanceConstraints;
     bool m_enableVolumeConstraints;
     bool m_enableEnvCollisionConstraints;
@@ -171,4 +156,66 @@ private:
     float m_alpha;
     float m_beta;
     float m_k;
+
+private:
+    std::unique_ptr<Camera> createCamera();
+    std::unique_ptr<Light> createLight();
+
+    std::unique_ptr<Object> createObject(const ObjectConfig& config);
+    SceneConfig parseSceneConfig(const YAML::Node& sceneYaml);
+
+    std::optional<glm::vec3> rayIntersectsTriangle(
+        const glm::vec3& ray_origin,
+        const glm::vec3& ray_vector,
+        const Mesh::Triangle& triangle,
+        const std::vector<Transform>& vertexTransforms
+    );
+
+    void setupEnvCollisionConstraints();
+    void applyGravity(
+        Object& object,
+        float deltaTime
+    );
+
+    float calculateDeltaLambda(
+        float C_j,
+        const std::vector<glm::vec3>& gradC_j,
+        const std::vector<glm::vec3>& posDiff,
+        std::span<const unsigned int> constraintVertices,
+        const std::vector<float>& M,
+        float alphaTilde,
+        float gamma
+    );
+    void setDeltaX(
+        std::vector<glm::vec3>& deltaX,
+        float deltaLambda,
+        const std::vector<float>& M,
+        const std::vector<glm::vec3>& gradC_j,
+        std::span<const unsigned int> constraintVertices
+    );
+    void updateConstraintPositions(
+        std::vector<glm::vec3>& x,
+        const std::vector<glm::vec3>& deltaX
+    );
+    void applyXPBD(
+        Object& object,
+        float deltaTime,
+        const glm::vec3& cameraPos,
+        const glm::vec3& rayDir
+    );
+
+    void applyGroundCollision(Object& object);
+
+    void updateObjectTransform(Object& object);
+    void updateObjectPhysics(
+        Object& object,
+        float deltaTime,
+        const glm::vec3& cameraPos,
+        const glm::vec3& rayDir
+    );
+    void updateObjects(
+        float deltaTime,
+        const glm::vec3& cameraPos,
+        const glm::vec3& rayDir
+    );
 };

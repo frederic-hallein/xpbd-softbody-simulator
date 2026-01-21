@@ -63,6 +63,14 @@ public:
     std::vector<glm::vec3>& getPositions() { return m_positions; }
     const std::vector<Vertex>& getVertices() const { return m_vertices; }
 
+    struct MouseDistanceConstraints
+    {
+        std::vector<Triangle> triangles;
+        std::vector<Constraint> C;
+        std::vector<ConstraintGradient> gradC;
+    };
+    MouseDistanceConstraints mouseDistanceConstraints;
+
     struct DistanceConstraints
     {
         std::vector<Edge> edges;
@@ -101,6 +109,7 @@ private:
 
     std::vector<glm::vec3> calculateFaceNormals();
 
+    void constructMouseDistanceConstraintVertices(const aiMesh* mesh);
     void constructDistanceConstraintVertices(const aiMesh* mesh);
     void constructVolumeConstraintVertices(const aiMesh* mesh);
     void constructEnvCollisionConstraintVertices();

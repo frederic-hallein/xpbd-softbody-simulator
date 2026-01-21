@@ -20,8 +20,6 @@ std::unique_ptr<Camera> Scene::createCamera()
 
     return std::make_unique<Camera>(
         glm::vec3(0.0f, 5.0f, 20.0f),
-        glm::vec3(0.0f, 0.0f, -1.0f),
-        glm::vec3(0.0f, 1.0f, 0.0f),
         FOV,
         aspectRatio,
         nearPlane,
@@ -244,7 +242,6 @@ void Scene::applyGravity(
     }
 }
 
-// TODO : fixme
 float Scene::calculateDeltaLambda(
     float C_j,
     const std::vector<glm::vec3>& gradC_j,
@@ -267,25 +264,6 @@ float Scene::calculateDeltaLambda(
 
     return (-C_j - gamma * gradCPosDiff) / ((1 + gamma) * gradCMInverseGradCT + alphaTilde);
 }
-
-// std::vector<glm::vec3> Scene::calculateDeltaX(
-//     float lambda,
-//     const std::vector<float>& M,
-//     std::vector<glm::vec3>& gradC_j,
-//     std::span<const unsigned int> constraintVertices
-// )
-// {
-//     std::vector<glm::vec3> deltaX(M.size(), glm::vec3(0.0f));
-//     size_t n = constraintVertices.size();
-//     for (size_t i = 0; i < n; ++i)
-//     {
-//         unsigned int v = constraintVertices[i];
-//         float w = 1.0f / M[v];
-//         deltaX[v] = lambda * w * gradC_j[i];
-//     }
-
-//     return deltaX;
-// }
 
 void Scene::setDeltaX(
     std::vector<glm::vec3>& deltaX,
@@ -312,6 +290,198 @@ void Scene::updateConstraintPositions(
     for (size_t k = 0; k < deltaX.size(); ++k) {
         x[k] += deltaX[k];
     }
+}
+
+std::optional<glm::vec3> Scene::rayIntersectsTriangle(
+    const glm::vec3& rayOrigin,
+    const glm::vec3& rayDirection,
+    const Mesh::Triangle& triangle,
+    const std::vector<Transform>& vertexTransforms
+)
+{
+    constexpr float epsilon = std::numeric_limits<float>::epsilon();
+
+    glm::vec3 v1 = vertexTransforms[triangle.v1].getPosition();
+    glm::vec3 v2 = vertexTransforms[triangle.v2].getPosition();
+    glm::vec3 v3 = vertexTransforms[triangle.v3].getPosition();
+
+    glm::vec3 edge1 = v2 - v1;
+    glm::vec3 edge2 = v3 - v1;
+    glm::vec3 rayCrossEdge2 = glm::cross(rayDirection, edge2);
+    float determinant = glm::dot(edge1, rayCrossEdge2);
+
+    if (determinant > -epsilon && determinant < epsilon)
+        return {};
+
+    float inverseDeterminant = 1.0f / determinant;
+    glm::vec3 rayOriginToV1 = rayOrigin - v1;
+    float u = inverseDeterminant * glm::dot(rayOriginToV1, rayCrossEdge2);
+
+    if ((u < 0.0f && glm::abs(u) > epsilon) || (u > 1.0f && glm::abs(u - 1.0f) > epsilon))
+        return {};
+
+    glm::vec3 rayOriginToV1CrossEdge1 = glm::cross(rayOriginToV1, edge1);
+    float v = inverseDeterminant * glm::dot(rayDirection, rayOriginToV1CrossEdge1);
+
+    if ((v < 0.0f && glm::abs(v) > epsilon) || (u + v > 1.0f && glm::abs(u + v - 1.0f) > epsilon))
+        return {};
+
+    float t = inverseDeterminant * glm::dot(edge2, rayOriginToV1CrossEdge1);
+
+    if (t > epsilon)
+    {
+        return glm::vec3(rayOrigin + rayDirection * t);
+    }
+    return {};
+}
+
+Scene::PickResult Scene::pickObject(const glm::vec3& rayOrigin, const glm::vec3& rayDir)
+{
+    PickResult result;
+    float closestDistance = std::numeric_limits<float>::max();
+
+    for (const auto& objPtr : m_objects)
+    {
+        if (objPtr->isStatic()) continue;
+
+        auto& mesh = objPtr->getMesh();
+        auto& vertexTransforms = objPtr->getVertexTransforms();
+        const auto& triangles = mesh.mouseDistanceConstraints.triangles;
+
+        for (const auto& triangle : triangles)
+        {
+            auto intersection = rayIntersectsTriangle(
+                rayOrigin,
+                rayDir,
+                triangle,
+                vertexTransforms
+            );
+            if (intersection)
+            {
+                float dist = glm::distance(rayOrigin, intersection.value());
+                if (dist < closestDistance)
+                {
+                    closestDistance = dist;
+                    result.object = objPtr.get();
+                    result.triangle = triangle;
+                    result.intersection = intersection.value();
+                    result.hit = true;
+                }
+            }
+        }
+    }
+
+    return result;
+}
+
+void Scene::createMouseConstraints(
+    const PickResult& pick
+)
+{
+    if (m_activeMouseConstraint.isActive) return;
+    if (!pick.hit) return;
+
+    auto& mesh = pick.object->getMesh();
+    auto& vertexTransforms = pick.object->getVertexTransforms();
+
+    m_activeMouseConstraint.isActive = true;
+    m_activeMouseConstraint.object = pick.object;
+    m_activeMouseConstraint.triangle = pick.triangle;
+    m_activeMouseConstraint.intersectionPoint = pick.intersection;
+
+    m_activeMouseConstraint.initialDistances[0] = glm::distance(pick.intersection, vertexTransforms[pick.triangle.v1].getPosition());
+    m_activeMouseConstraint.initialDistances[1] = glm::distance(pick.intersection, vertexTransforms[pick.triangle.v2].getPosition());
+    m_activeMouseConstraint.initialDistances[2] = glm::distance(pick.intersection, vertexTransforms[pick.triangle.v3].getPosition());
+
+    logger::info("Mouse constraint created for triangle ({}, {}, {})",
+        pick.triangle.v1, pick.triangle.v2, pick.triangle.v3);
+}
+
+// TODO : fixme
+void Scene::updateMouseConstraints(
+    const glm::vec3& cameraPos,
+    const glm::vec3& rayDir
+)
+{
+    if (!m_activeMouseConstraint.isActive) return;
+
+    auto& vertexTransforms = m_activeMouseConstraint.object->getVertexTransforms();
+    const auto& triangle = m_activeMouseConstraint.triangle;
+
+    // Always use plane projection for stability
+    glm::vec3 v0 = vertexTransforms[triangle.v1].getPosition();
+    glm::vec3 v1 = vertexTransforms[triangle.v2].getPosition();
+    glm::vec3 v2 = vertexTransforms[triangle.v3].getPosition();
+
+    glm::vec3 edge1 = v1 - v0;
+    glm::vec3 edge2 = v2 - v0;
+    glm::vec3 normal = glm::normalize(glm::cross(edge1, edge2));
+
+    // Project ray onto plane
+    float denom = glm::dot(normal, rayDir);
+    if (glm::abs(denom) > 1e-6f)
+    {
+        float t = glm::dot(v0 - cameraPos, normal) / denom;
+        if (t > 0.0f)
+        {
+            glm::vec3 planeIntersection = cameraPos + rayDir * t;
+
+            // Only update if the new position is reasonable (within some distance)
+            float distanceFromPrevious = glm::distance(planeIntersection, m_activeMouseConstraint.intersectionPoint);
+            if (distanceFromPrevious < 5.0f)  // Clamp large jumps
+            {
+                m_activeMouseConstraint.intersectionPoint = planeIntersection;
+            }
+        }
+    }
+}
+
+void Scene::solveMouseConstraints(
+    std::vector<glm::vec3>& x,
+    const std::vector<glm::vec3>& posDiff,
+    const std::vector<float>& M,
+    float deltaTime_s
+)
+{
+    const auto& constraint = m_activeMouseConstraint;
+    const auto& triangle = constraint.triangle;
+    glm::vec3 intersectionPos = constraint.intersectionPoint;
+    std::vector<glm::vec3> deltaX(M.size(), glm::vec3(0.0f));
+
+    constexpr float mouseAlpha = 0.005f;
+    constexpr float mouseBeta = 1.0f;
+
+    float mouseAlphaTilde = mouseAlpha / (deltaTime_s * deltaTime_s);
+    float mouseBetaTilde = (deltaTime_s * deltaTime_s) * mouseBeta;
+    float mouseGamma = (mouseAlphaTilde * mouseBetaTilde) / deltaTime_s;
+
+    std::array<unsigned int, 3> triangleVertices = {
+        triangle.v1,
+        triangle.v2,
+        triangle.v3
+    };
+
+    std::array<unsigned int, 1> vertex;
+    for (int i = 0; i < 3; ++i)
+    {
+        unsigned int v = triangleVertices[i];
+
+        float d_0 = constraint.initialDistances[i];
+        float C_j = glm::distance(x[v], intersectionPos) - d_0;
+
+        std::vector<glm::vec3> gradC_j(x.size(), glm::vec3(0.0f));
+        glm::vec3 diff = x[v] - intersectionPos;
+        float dist = glm::distance(x[v], intersectionPos);
+        if (dist > 1e-6f)
+        {
+            gradC_j[v] = glm::normalize(diff);
+        }
+
+        vertex[0] = v;
+        float deltaLambda = calculateDeltaLambda(C_j, gradC_j, posDiff, vertex, M, mouseAlphaTilde, mouseGamma);
+        setDeltaX(deltaX, deltaLambda, M, gradC_j, vertex);
+    }
+    updateConstraintPositions(x, deltaX);
 }
 
 void Scene::solveDistanceConstraints(
@@ -429,7 +599,9 @@ void Scene::solveEnvCollisionConstraints(
 
 void Scene::applyXPBD(
     Object& object,
-    float deltaTime
+    float deltaTime,
+    const glm::vec3& cameraPos,
+    const glm::vec3& rayDir
 )
 {
     const auto& mesh = object.getMesh();
@@ -465,6 +637,18 @@ void Scene::applyXPBD(
             posDiff[i] = x[i] - p[i];
         }
 
+        // Solve mouse constraints if active
+        if (m_activeMouseConstraint.isActive)
+        {
+            solveMouseConstraints(
+                x,
+                posDiff,
+                M,
+                deltaTime_s
+            );
+        }
+
+        // TODO : fixme
         // Environment Collision constraints
         if (m_enableEnvCollisionConstraints)
         {
@@ -535,9 +719,6 @@ void Scene::applyGroundCollision(Object& object)
     }
 }
 
-// TODO : check for object intersection using Möller-Trumbore ray-triangle intersection algorithm
-// if intersection with triangle, construct 3 distanceConstraints and call solveDistanceConstraints()
-// for it
 void Scene::updateObjectPhysics(
     Object& object,
     float deltaTime,
@@ -548,7 +729,7 @@ void Scene::updateObjectPhysics(
     if (!object.isStatic())
     {
         applyGravity(object, deltaTime);
-        applyXPBD(object, deltaTime);
+        applyXPBD(object, deltaTime, cameraPos, rayDir);
         applyGroundCollision(object);
     }
 }

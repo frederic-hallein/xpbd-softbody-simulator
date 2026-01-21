@@ -57,9 +57,17 @@ void Camera::updateOrbit()
     m_cameraPos.y = m_orbitRadius * sin(m_orbitPitch);
     m_cameraPos.z = m_orbitRadius * cos(m_orbitPitch) * cos(m_orbitYaw);
 
-    m_cameraFront = glm::normalize(-m_cameraPos); // Always look at origin
-    m_cameraRight = glm::normalize(glm::cross(m_cameraUp, m_cameraPos));
-    // m_cameraUp    = glm::normalize(glm::cross(m_cameraPos, m_cameraRight));
+    // m_cameraFront = glm::normalize(glm::vec3(0.0f)-m_cameraPos);
+    // m_cameraRight = glm::normalize(glm::cross(m_cameraPos, m_cameraUp));
+    // // m_cameraUp    = glm::normalize(glm::cross(m_cameraPos, m_cameraRight));
+
+    m_cameraFront = glm::normalize(glm::vec3(0.0f) - m_cameraPos);
+
+    // Use world up to calculate right vector
+    m_cameraRight = glm::normalize(glm::cross(m_worldUp, m_cameraFront));
+
+    // Calculate camera up from right and front
+    m_cameraUp = glm::normalize(glm::cross(m_cameraFront, m_cameraRight));
 
 }
 
@@ -73,25 +81,24 @@ void Camera::updateOrbitAngles(float yawDelta, float pitchDelta)
 void Camera::resetPosition()
 {
     m_cameraPos = m_originalCameraPos;
-    m_cameraFront = glm::normalize(glm::vec3(0.0f) - m_cameraPos); // Point back to origin
+    m_cameraFront = glm::normalize(glm::vec3(0.0f) - m_cameraPos);
     setOrbit();
 }
 
 Camera::Camera(
     glm::vec3 cameraPos,
-    glm::vec3 cameraFront,
-    glm::vec3 cameraUp,
     float fov,
     float aspectRatio,
     float nearPlane,
     float farPlane,
     GLFWwindow* window
 )
-    : m_cameraPos(cameraPos),
+    : m_worldUp(glm::vec3(0.0f, 1.0f, 0.0f)),
+      m_cameraPos(cameraPos),
       m_originalCameraPos(cameraPos),
-    //   m_cameraFront(cameraFront),
       m_cameraFront(glm::normalize(glm::vec3(0.0f) - cameraPos)),
-      m_cameraUp(cameraUp),
+      m_cameraRight(glm::cross(m_worldUp, m_cameraFront)),
+      m_cameraUp(m_worldUp),
       m_FOV(fov),
       m_aspectRatio(aspectRatio),
       m_nearPlane(nearPlane),

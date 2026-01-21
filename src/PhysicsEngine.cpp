@@ -164,29 +164,37 @@ void PhysicsEngine::processInput()
     if(glfwGetKey(m_window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(m_window, true);
 
-    // Camera* camera = m_sceneManager->getCurrentCamera();
-    // if (camera) {
-    //     camera->setDeltaTime(m_timer->getDeltaTime());
+    Scene* scene = m_sceneManager->getCurrentScene();
+    if (!scene) return;
 
-    //     float moveSpeed = 100.0f * m_timer->getDeltaTime();
+    // Skip mouse interaction if ImGui is using the mouse
+    ImGuiIO& io = ImGui::GetIO();
+    if (io.WantCaptureMouse) return;
 
-    //     glm::vec3 newPos = camera->getPosition();
+    static bool mouseWasPressed = false;
+    int mouseState = glfwGetMouseButton(m_window, GLFW_MOUSE_BUTTON_LEFT);
 
-    //     if (glfwGetKey(m_window, GLFW_KEY_W) == GLFW_PRESS)
-    //         newPos += camera->getFront() * moveSpeed;
-    //     if (glfwGetKey(m_window, GLFW_KEY_S) == GLFW_PRESS)
-    //         newPos -= camera->getFront() * moveSpeed;
-    //     if (glfwGetKey(m_window, GLFW_KEY_A) == GLFW_PRESS)
-    //         newPos -= camera->getRight() * moveSpeed;
-    //     if (glfwGetKey(m_window, GLFW_KEY_D) == GLFW_PRESS)
-    //         newPos += camera->getRight() * moveSpeed;
-    //     if (glfwGetKey(m_window, GLFW_KEY_SPACE) == GLFW_PRESS)
-    //         newPos += camera->getUp() * moveSpeed;
-    //     if (glfwGetKey(m_window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-    //         newPos -= camera->getUp() * moveSpeed;
+    double mouseX, mouseY;
+    glfwGetCursorPos(m_window, &mouseX, &mouseY);
 
-    //     camera->setPosition(newPos);
-    // }
+    Camera* camera = m_sceneManager->getCurrentCamera();
+    if (!camera) return;
+
+    glm::vec3 rayDir = camera->getRayDirection(mouseX, mouseY, m_screenWidth, m_screenHeight);
+    glm::vec3 cameraPos = camera->getPosition();
+
+    auto pick = scene->pickObject(cameraPos, rayDir);
+    if (mouseState == GLFW_PRESS && !mouseWasPressed) {
+        scene->createMouseConstraints(pick);
+        mouseWasPressed = true;
+    }
+    else if (mouseState == GLFW_PRESS && mouseWasPressed) {
+        scene->updateMouseConstraints(cameraPos, rayDir);
+    }
+    else if (mouseState == GLFW_RELEASE && mouseWasPressed) {
+        scene->releaseMouseConstraints();
+        mouseWasPressed = false;
+    }
 }
 
 void PhysicsEngine::update()

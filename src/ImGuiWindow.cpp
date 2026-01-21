@@ -181,8 +181,8 @@ void DebugWindow::displayXPBDParameters(Scene& scene)
     ImGui::Dummy(ImVec2(0.0f, 5.0f));
 
     float& alpha = scene.getAlpha();
-    float alpha_min = 0.0f;
-    float alpha_max = 0.1f;
+    float alpha_min = 0.1f;
+    float alpha_max = 1.0f;
     ImGui::Text("Compliance:");
     ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x - 1);
     ImGui::SliderFloat("##Compliance", &alpha, alpha_min, alpha_max);

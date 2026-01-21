@@ -80,6 +80,20 @@ void Mesh::constructIndices(const aiMesh* mesh)
     }
 }
 
+void Mesh::constructMouseDistanceConstraintVertices(const aiMesh* mesh)
+{
+    for (unsigned int i = 0; i < mesh->mNumFaces; ++i) {
+        const aiFace& face = mesh->mFaces[i];
+        if (face.mNumIndices == 3) {
+            Triangle triangle;
+            triangle.v1 = m_vertexToPositionIndex[face.mIndices[0]];
+            triangle.v2 = m_vertexToPositionIndex[face.mIndices[1]];
+            triangle.v3 = m_vertexToPositionIndex[face.mIndices[2]];
+            mouseDistanceConstraints.triangles.push_back(triangle);
+        }
+    }
+}
+
 void Mesh::constructDistanceConstraintVertices(const aiMesh* mesh)
 {
     struct UniqueEdge
@@ -184,6 +198,7 @@ void Mesh::loadObjData(const std::string& filePath)
     constructIndices(mesh);
 
     // construct vertices used for specific constraints
+    constructMouseDistanceConstraintVertices(mesh);
     constructDistanceConstraintVertices(mesh);
     constructVolumeConstraintVertices(mesh);
     constructEnvCollisionConstraintVertices();

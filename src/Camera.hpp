@@ -11,8 +11,6 @@ class Camera
 public:
     Camera(
         glm::vec3 cameraPos,
-        glm::vec3 cameraFront,
-        glm::vec3 cameraUp,
         float FOV,
         float aspectRatio,
         float nearPlane,
@@ -50,6 +48,7 @@ public:
     static void cursorPosCallback(GLFWwindow* window, double xpos, double ypos);
 
 private:
+    glm::vec3 m_worldUp;
     glm::vec3 m_originalCameraPos;
 
     glm::vec3 m_cameraPos;
@@ -74,7 +73,4 @@ private:
     float m_orbitYaw;
     float m_orbitPitch;
     float m_orbitRadius;
-
-    // float m_yaw;
-    // float m_pitch;
 };
