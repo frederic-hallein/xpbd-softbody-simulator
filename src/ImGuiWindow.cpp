@@ -204,7 +204,7 @@ void DebugWindow::displayXPBDParameters(
 
     float& alpha = scene.getAlpha();
     float alpha_min = 0.0f;
-    if (scene.getName() == "Test Scene 2") alpha_min = 0.1f;
+    if (scene.getName() == "Test Scene 2") alpha_min = 0.1f; // TODO: create icosphere with a lot of triangles
     float alpha_max = 1.0f;
     ImGui::Text("Compliance:");
     ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x - 1);
@@ -345,6 +345,13 @@ void DebugWindow::displaySceneObjects(
         if (!ImGui::CollapsingHeader(title.c_str())) {
             continue;
         }
+
+        float distanceEnergy = object->getDistanceConstraintEnergy();
+        ImGui::Text("Distance Constraint Energy: %.2f J", distanceEnergy);
+
+        float volumeEnergy = object->getVolumeConstraintEnergy();
+        ImGui::Text("Volume Constraint Energy: %.2f J", volumeEnergy);
+        ImGui::Dummy(ImVec2(0.0f, 5.0f));
 
         displayVertexTransforms(i, object);
         displayPolygonMode(i, object);

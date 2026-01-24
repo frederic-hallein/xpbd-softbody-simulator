@@ -84,6 +84,12 @@ public:
         float deltaTime_s
     );
 
+    float computeConstraintEnergy(
+        float alpha,
+        const std::vector<std::function<float(const std::vector<glm::vec3>&)>>& constraintFunctions,
+        const std::vector<glm::vec3>& x
+    );
+
     bool& enableDistanceConstraints() { return m_enableDistanceConstraints; }
     void solveDistanceConstraints(
         std::vector<glm::vec3>& x,
@@ -91,6 +97,12 @@ public:
         const std::vector<float>& M,
         float alphaTilde,
         float gamma,
+        const Mesh::DistanceConstraints& distanceConstraints
+    );
+    void computeDistanceConstraintEnergy(
+        Object& object,
+        const std::vector<glm::vec3>& x,
+        float alpha,
         const Mesh::DistanceConstraints& distanceConstraints
     );
 
@@ -101,6 +113,12 @@ public:
         const std::vector<float>& M,
         float alphaTilde,
         float gamma,
+        const Mesh::VolumeConstraints& volumeConstraints
+    );
+    void computeVolumeConstraintEnergy(
+        Object& object,
+        const std::vector<glm::vec3>& x,
+        float alpha,
         const Mesh::VolumeConstraints& volumeConstraints
     );
 

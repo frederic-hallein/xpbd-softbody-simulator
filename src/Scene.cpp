@@ -473,6 +473,25 @@ void Scene::solveMouseConstraints(
     }
 }
 
+float Scene::computeConstraintEnergy(
+    float alpha,
+    const std::vector<Constraint>& constraints,
+    const std::vector<glm::vec3>& x
+)
+{
+    if (alpha == 0.0f) {
+        return 0.0f;
+    }
+
+    float totalEnergy = 0.0f;
+    for (const auto& constraint : constraints) {
+        float C = constraint(x);
+        totalEnergy += (0.5f / alpha) * (C * C);
+    }
+
+    return totalEnergy;
+}
+
 void Scene::solveDistanceConstraints(
     std::vector<glm::vec3>& x,
     const std::vector<glm::vec3>& posDiff,
@@ -501,6 +520,17 @@ void Scene::solveDistanceConstraints(
         setDeltaX(deltaX, deltaLambda, M, gradC_j, constraintVertices);
         updateConstraintPositions(x, deltaX);
     }
+}
+
+void Scene::computeDistanceConstraintEnergy(
+    Object& object,
+    const std::vector<glm::vec3>& x,
+    float alpha,
+    const Mesh::DistanceConstraints& distanceConstraints
+)
+{
+    float energy = computeConstraintEnergy(alpha, distanceConstraints.C, x);
+    object.setDistanceConstraintEnergy(energy);
 }
 
 void Scene::solveVolumeConstraints(
@@ -534,6 +564,17 @@ void Scene::solveVolumeConstraints(
     std::vector<glm::vec3> deltaX(M.size(), glm::vec3(0.0f));
     setDeltaX(deltaX, deltaLambda, M, gradC_j, constraintVertices);
     updateConstraintPositions(x, deltaX);
+}
+
+void Scene::computeVolumeConstraintEnergy(
+    Object& object,
+    const std::vector<glm::vec3>& x,
+    float alpha,
+    const Mesh::VolumeConstraints& volumeConstraints
+)
+{
+    float energy = computeConstraintEnergy(alpha, volumeConstraints.C, x);
+    object.setVolumeConstraintEnergy(energy);
 }
 
 // TODO : fixme
@@ -650,18 +691,6 @@ void Scene::applyXPBD(
             );
         }
 
-        // Environment Collision constraints
-        if (m_enableEnvCollisionConstraints) {
-            solveEnvCollisionConstraints(
-                x,
-                posDiff,
-                M,
-                alphaTilde,
-                gamma,
-                perEnvCollisionConstraints
-            );
-        }
-
         // Distance constraints
         if (m_enableDistanceConstraints) {
             solveDistanceConstraints(
@@ -670,6 +699,13 @@ void Scene::applyXPBD(
                 M,
                 alphaTilde,
                 gamma,
+                distanceConstraints
+            );
+
+            computeDistanceConstraintEnergy(
+                object,
+                x,
+                m_alpha,
                 distanceConstraints
             );
         }
@@ -683,6 +719,25 @@ void Scene::applyXPBD(
                 alphaTilde,
                 gamma,
                 volumeConstraints
+            );
+
+            computeVolumeConstraintEnergy(
+                object,
+                x,
+                m_alpha,
+                volumeConstraints
+            );
+        }
+
+        // Environment Collision constraints
+        if (m_enableEnvCollisionConstraints) {
+            solveEnvCollisionConstraints(
+                x,
+                posDiff,
+                M,
+                alphaTilde,
+                gamma,
+                perEnvCollisionConstraints
             );
         }
 

@@ -14,8 +14,7 @@
 #include "Light.hpp"
 #include "Texture.hpp"
 
-class Object
-{
+class Object {
 public:
     Object() = default;
     Object(
@@ -47,6 +46,12 @@ public:
     Mesh& getMesh() { return m_mesh; }
     const std::vector<float>& getMass() const { return m_M; }
 
+    float getDistanceConstraintEnergy() const { return m_distanceEnergy; }
+    void setDistanceConstraintEnergy(float energy) { m_distanceEnergy = energy; }
+
+    float getVolumeConstraintEnergy() const { return m_volumeEnergy; }
+    void setVolumeConstraintEnergy(float energy) { m_volumeEnergy = energy; }
+
     void resetVertexTransforms();
 
     void setProjectionViewUniforms(const Shader& shader);
@@ -59,6 +64,7 @@ public:
 
     static void setVertexNormalShader(const Shader& shader) { s_vertexNormalShader = shader; }
     static void setFaceNormalShader(const Shader& shader)   { s_faceNormalShader   = shader; }
+
 
 private:
     std::string m_name;
@@ -78,5 +84,8 @@ private:
     std::vector<Transform> m_initialVertexTransforms;
     std::vector<Transform> m_vertexTransforms;
     std::vector<float> m_M;
+
+    float m_distanceEnergy;
+    float m_volumeEnergy;
 
 };
