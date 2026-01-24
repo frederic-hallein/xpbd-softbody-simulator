@@ -23,7 +23,10 @@ SceneManager::SceneManager(
 {
 }
 
-void SceneManager::createScene(const std::string& sceneName, const std::string& sceneFilename)
+void SceneManager::createScene(
+    const std::string& sceneName,
+    const std::string& sceneFilename
+)
 {
     const std::string scenePath = "../scenes/" + sceneFilename;
     try {
@@ -42,16 +45,14 @@ void SceneManager::createScene(const std::string& sceneName, const std::string& 
     }
 }
 
-void SceneManager::createScenes()
-{
+void SceneManager::createScenes() {
     logger::info("Creating scenes...");
     for (const auto& [sceneName, sceneFilename] : SCENE_LIST) {
         createScene(std::string(sceneName), std::string(sceneFilename));
     }
 }
 
-Scene* SceneManager::getCurrentScene()
-{
+Scene* SceneManager::getCurrentScene() {
     auto it = m_scenes.find(m_currentSceneName);
     if (it == m_scenes.end()) {
         return nullptr;
@@ -59,7 +60,9 @@ Scene* SceneManager::getCurrentScene()
     return it->second.get();
 }
 
-void SceneManager::switchScene(const std::string& sceneName)
+void SceneManager::switchScene(
+    const std::string& sceneName
+)
 {
     auto it = m_scenes.find(sceneName);
     if (it == m_scenes.end()) {
@@ -87,26 +90,38 @@ Camera* SceneManager::getCurrentCamera()
     return scene->getCamera();
 }
 
-static void GlfwScrollDispatcher(GLFWwindow* window, double xoffset, double yoffset)
+static void GlfwScrollDispatcher(
+    GLFWwindow* window,
+    double xoffset,
+    double yoffset
+)
 {
     ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
     Camera::scrollCallback(window, xoffset, yoffset);
 }
 
-static void GlfwMouseButtonDispatcher(GLFWwindow* window, int button, int action, int mods)
+static void GlfwMouseButtonDispatcher(
+    GLFWwindow* window,
+    int button,
+    int action,
+    int mods
+)
 {
     ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
     Camera::mouseButtonCallback(window, button, action, mods);
 }
 
-static void GlfwCursorPosDispatcher(GLFWwindow* window, double xpos, double ypos)
+static void GlfwCursorPosDispatcher(
+    GLFWwindow* window,
+    double xpos,
+    double ypos
+)
 {
     ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
     Camera::cursorPosCallback(window, xpos, ypos);
 }
 
-void SceneManager::setupCameraCallbacks()
-{
+void SceneManager::setupCameraCallbacks() {
     Camera* camera = getCurrentCamera();
     if (!camera) return;
 

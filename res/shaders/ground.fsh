@@ -10,6 +10,7 @@ uniform vec3 objectColor;
 uniform vec3 lightPos;
 uniform vec3 lightColor;
 uniform vec3 viewPos;
+uniform float barrierSize;
 uniform bool hasTexture; // Not used for checkerboard, but kept for compatibility
 
 void main()
@@ -35,5 +36,17 @@ void main()
     float checker = mod(floor(TexCoord.x * scale) + floor(TexCoord.y * scale), 2.0);
     vec3 checkerColor = mix(vec3(1.0), vec3(0.0), checker); // White and black
 
-    FragColor = vec4(checkerColor * result, 1.0);
+    // Red square outline at barrier boundaries
+    float lineWidth = 0.2;
+    float distToEdgeX = min(abs(FragPos.x - barrierSize), abs(FragPos.x + barrierSize));
+    float distToEdgeZ = min(abs(FragPos.z - barrierSize), abs(FragPos.z + barrierSize));
+
+    bool nearXEdge = distToEdgeX < lineWidth && abs(FragPos.z) <= barrierSize;
+    bool nearZEdge = distToEdgeZ < lineWidth && abs(FragPos.x) <= barrierSize;
+
+    if (nearXEdge || nearZEdge) {
+        FragColor = vec4(1.0, 0.0, 0.0, 1.0); // Red outline
+    } else {
+        FragColor = vec4(checkerColor * result, 1.0);
+    }
 }

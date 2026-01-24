@@ -34,7 +34,7 @@ public:
 
     void update(float deltaTime);
     void updateTransformWithCOM();
-    void render(Light* light, const glm::vec3& cameraPosition);
+    void render(Light* light, const glm::vec3& cameraPosition, float barrierSize);
 
     void setPolygonMode(GLenum mode) { m_polygonMode = mode; }
     GLenum getPolygonMode() const { return m_polygonMode; }

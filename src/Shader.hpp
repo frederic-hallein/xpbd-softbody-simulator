@@ -5,8 +5,7 @@
 #include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
 
-class Shader
-{
+class Shader {
 public:
     Shader() = default;
     Shader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath);
@@ -19,9 +18,9 @@ public:
     void useProgram();
     void destroy();
 
-    // void setUniform(const std::string& name, const glm::vec3& color);
     void setVec3(const std::string& name, const glm::vec3& value) const;
     void setInt(const std::string &name, int value) const;
+    void setFloat(const std::string& name, float value) const;
 
 private:
     std::string m_name;

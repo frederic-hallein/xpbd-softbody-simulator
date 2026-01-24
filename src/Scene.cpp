@@ -209,6 +209,7 @@ Scene::Scene(
         m_textureManager(textureManager),
         m_gravitationalAcceleration(0.0f, -9.81f, 0.0f),
         m_groundLevel(0.0f),
+        m_barrierSize(30.0f),
         m_enableDistanceConstraints(true),
         m_enableVolumeConstraints(true),
         m_enableEnvCollisionConstraints(true),
@@ -766,6 +767,32 @@ void Scene::applyGroundCollision(Object& object) {
     }
 }
 
+void Scene::applyInvisibleBarrierCollision(Object& object) {
+    auto& vertexTransforms = object.getVertexTransforms();
+    for (auto& vertexTransform : vertexTransforms) {
+        glm::vec3 pos = vertexTransform.getPosition();
+        glm::vec3 vel = vertexTransform.getVelocity();
+        if (pos.x < -m_barrierSize) {
+            pos.x = -m_barrierSize;
+            if (vel.x < 0.0f) vel.x = 0.0f;
+        } else if (pos.x > m_barrierSize) {
+            pos.x = m_barrierSize;
+            if (vel.x > 0.0f) vel.x = 0.0f;
+        }
+
+        if (pos.z < -m_barrierSize) {
+            pos.z = -m_barrierSize;
+            if (vel.z < 0.0f) vel.z = 0.0f;
+        } else if (pos.z > m_barrierSize) {
+            pos.z = m_barrierSize;
+            if (vel.z > 0.0f) vel.z = 0.0f;
+        }
+
+        vertexTransform.setPosition(pos);
+        vertexTransform.setVelocity(vel);
+    }
+}
+
 void Scene::updateObjectPhysics(
     Object& object,
     float deltaTime,
@@ -777,6 +804,7 @@ void Scene::updateObjectPhysics(
         applyGravity(object, deltaTime);
         applyXPBD(object, deltaTime, cameraPos, rayDir);
         applyGroundCollision(object);
+        applyInvisibleBarrierCollision(object);
     }
 }
 
@@ -832,7 +860,7 @@ void Scene::render() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     for (const auto& object : m_objects) {
-        object->render(m_light.get(), m_camera->getPosition());
+        object->render(m_light.get(), m_camera->getPosition(), m_barrierSize);
     }
 
 }

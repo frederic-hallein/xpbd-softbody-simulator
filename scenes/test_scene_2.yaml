@@ -2,7 +2,7 @@ scene:
   name: Test Scene 2
   objects:
     # Ground
-    - name: Surface
+    - name: Ground
       position: [0.0, 0.0, 0.0]
       rotationAxis: [0.0, 0.0, 1.0]
       rotationDeg: 180.0

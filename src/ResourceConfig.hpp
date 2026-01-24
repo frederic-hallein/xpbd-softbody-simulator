@@ -35,6 +35,4 @@ static constexpr std::array<std::pair<std::string_view, std::string_view>, 6> ME
 static constexpr std::array<std::pair<std::string_view, std::string_view>, 4> TEXTURE_DATA = {{
     {"dirtblock", "dirtblock.jpg"},
     {"checkerboard", "checkerboard.png"},
-    // {"tile", "tile.jpg"},
-    // {"emoji", "emoji.jpeg"},
 }};

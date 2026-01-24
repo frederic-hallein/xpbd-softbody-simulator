@@ -119,7 +119,8 @@ void Object::setProjectionViewUniforms(
 
 void Object::render(
     Light* light,
-    const glm::vec3& cameraPosition
+    const glm::vec3& cameraPosition,
+    float barrierSize
 )
 {
     glPolygonMode(GL_FRONT_AND_BACK, m_polygonMode);
@@ -130,6 +131,11 @@ void Object::render(
     m_shader.setVec3("lightColor", light->getColor());
     m_shader.setVec3("lightPos", light->getPosition());
     m_shader.setVec3("viewPos", cameraPosition);
+
+    if (m_name == "Ground") {
+        m_shader.setFloat("barrierSize", barrierSize);
+    }
+
     if (m_texture) {
         m_texture->bind();
         m_shader.setInt("ourTexture", 0); // 0 for single texture

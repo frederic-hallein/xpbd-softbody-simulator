@@ -144,6 +144,8 @@ private:
     unsigned int m_screenWidth;
     unsigned int m_screenHeight;
 
+    float m_barrierSize;
+
     ShaderManager* m_shaderManager;
     MeshManager* m_meshManager;
     TextureManager* m_textureManager;
@@ -223,6 +225,7 @@ private:
     );
 
     void applyGroundCollision(Object& object);
+    void applyInvisibleBarrierCollision(Object& object);
 
     void updateObjectTransform(Object& object);
     void updateObjectPhysics(
