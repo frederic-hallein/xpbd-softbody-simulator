@@ -182,6 +182,8 @@ private:
     std::unique_ptr<Light> createLight();
 
     std::unique_ptr<Object> createObject(const ObjectConfig& config);
+    void createObjects(const SceneConfig& config);
+
     SceneConfig parseSceneConfig(const YAML::Node& sceneYaml);
 
     std::optional<glm::vec3> rayIntersectsTriangle(

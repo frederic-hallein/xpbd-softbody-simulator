@@ -148,6 +148,12 @@ void Object::render(
     m_mesh.draw();
 
     glLineWidth(1.0f);
+
+    if (m_polygonMode != GL_LINE) {
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+    }
+
     if (m_enableFaceNormalShader) {
         s_faceNormalShader.useProgram();
         setProjectionViewUniforms(s_faceNormalShader);
@@ -159,4 +165,6 @@ void Object::render(
         setProjectionViewUniforms(s_vertexNormalShader);
         m_mesh.drawVertexNormals();
     }
+
+    glDisable(GL_CULL_FACE);
 }

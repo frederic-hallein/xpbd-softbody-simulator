@@ -85,6 +85,24 @@ std::unique_ptr<Object> Scene::createObject(
     }
 }
 
+void Scene::createObjects(
+    const SceneConfig& config
+)
+{
+    logger::info(" - Creating '{}' scene objects...", config.name);
+    for (const auto& config : config.objects) {
+        auto obj = createObject(config);
+        if (!obj) {
+            logger::error("Failed to create object: {}", config.name);
+            continue;
+        }
+
+        m_objects.push_back(std::move(obj));
+    }
+
+    setupEnvCollisionConstraints();
+}
+
 void Scene::loadSceneConfig(
     const std::string& configPath
 )
@@ -116,19 +134,7 @@ void Scene::loadSceneConfig(
         Object::setFaceNormalShader(faceNormalShaderOpt->get());
     }
 
-    logger::info(" - Creating '{}' scene objects...", sceneConfig.name);
-    for (const auto& config : sceneConfig.objects) {
-        auto obj = createObject(config);
-        if (!obj) {
-            logger::error("Failed to create object: {}", config.name);
-            continue;
-        }
-
-        m_objects.push_back(std::move(obj));
-
-    }
-
-    setupEnvCollisionConstraints(); // TODO : move
+    createObjects(sceneConfig);
 }
 
 SceneConfig Scene::parseSceneConfig(
@@ -174,18 +180,23 @@ SceneConfig Scene::parseSceneConfig(
     return config;
 }
 
+// TODO : fixme
 void Scene::setupEnvCollisionConstraints() {
+    // Build list of static objects once
+    std::vector<Object*> staticObjects;
+    staticObjects.reserve(m_objects.size());
+    for (const auto& obj : m_objects) {
+        if (obj->isStatic()) {
+            staticObjects.push_back(obj.get());
+        }
+    }
+
+    // Only set collision constraints between dynamic objects and static geometry
     for (const auto& obj : m_objects) {
         if (obj->isStatic()) continue;
 
-        std::vector<Object*> candidateObjects;
-        candidateObjects.reserve(m_objects.size());
-        for (const auto& objPtr : m_objects) {
-            candidateObjects.push_back(objPtr.get());
-        }
-
         Mesh& mesh = obj->getMesh();
-        mesh.setCandidateObjectMeshes(candidateObjects);
+        mesh.setCandidateObjectMeshes(staticObjects);
         mesh.constructEnvCollisionConstraints();
     }
 }
