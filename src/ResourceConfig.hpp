@@ -7,9 +7,9 @@
 
 // Scene configuration
 static constexpr std::array<std::pair<std::string_view, std::string_view>, 3> SCENE_LIST = {{
-    {"Test Scene 1", "test_scene_1.yaml"},
-    {"Test Scene 2", "test_scene_2.yaml"},
-    {"Test Scene 3", "test_scene_3.yaml"}
+    {"Cubes Scene", "cubesScene.yaml"},
+    {"Sphere Scene", "sphereScene.yaml"},
+    {"Cloth Scene", "clothScene.yaml"}
 }};
 
 // Shader configuration
@@ -25,11 +25,8 @@ static constexpr std::array<std::tuple<std::string_view, std::string_view, std::
 static constexpr std::array<std::pair<std::string_view, std::string_view>, 4> MESH_DATA = {{
     {"surface", "surface.obj"},
     {"cube", "cube.obj"},
-    {"sphere", "sphere.obj"},
+    {"sphere", "torus.obj"},
     {"cloth", "cloth.obj"}
-    // {"cone", "cone.obj"},
-    // {"torus", "torus.obj"},
-    // {"bunny", "bunny.obj"},
 }};
 
 // Texture configuration

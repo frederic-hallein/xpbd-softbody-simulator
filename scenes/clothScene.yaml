@@ -1,5 +1,5 @@
 scene:
-  name: Test Scene 3
+  name: Cloth Scene
   objects:
     # Ground
     - name: Ground
@@ -17,10 +17,10 @@ scene:
     - name: Cloth
       position: [0.0, 10.0, 0.0]
       rotationAxis: [1.0, 0.0, 0.0]
-      rotationDeg: 90.0
-      scale: [1.0, 1.0, 1.0]
+      rotationDeg: 0.0
+      scale: [5.0, 1.0, 8.0]
       shader: default
       mesh: cloth
       texture: ""
-      color: [1.0, 0.0, 0.0]
+      color: [0.369, 0.471, 0.290]
       isStatic: false

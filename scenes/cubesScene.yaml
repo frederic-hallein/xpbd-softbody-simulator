@@ -1,5 +1,5 @@
 scene:
-  name: Test Scene 1
+  name: Cubes Scene
   objects:
     - name: Ground
       position: [0.0, 0.0, 0.0]

@@ -65,7 +65,6 @@ public:
     static void setVertexNormalShader(const Shader& shader) { s_vertexNormalShader = shader; }
     static void setFaceNormalShader(const Shader& shader)   { s_faceNormalShader   = shader; }
 
-
 private:
     std::string m_name;
     Transform m_transform;
@@ -87,5 +86,7 @@ private:
 
     float m_distanceEnergy;
     float m_volumeEnergy;
+
+    std::vector<bool> m_pinnedVertices;
 
 };

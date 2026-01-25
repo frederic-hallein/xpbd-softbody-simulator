@@ -219,7 +219,7 @@ Scene::Scene(
         m_meshManager(meshManager),
         m_textureManager(textureManager),
         m_gravitationalAcceleration(0.0f, -9.81f, 0.0f),
-        m_groundLevel(0.0f),
+        m_groundLevel(0.1f),
         m_barrierSize(30.0f),
         m_enableDistanceConstraints(true),
         m_enableVolumeConstraints(true),
@@ -721,7 +721,7 @@ void Scene::applyXPBD(
         }
 
         // Volume constraints
-        if (m_enableVolumeConstraints && m_name != "Test Scene 3") {
+        if (m_enableVolumeConstraints && m_name != "Cloth Scene") {
             solveVolumeConstraints(
                 x,
                 posDiff,
@@ -811,12 +811,14 @@ void Scene::updateObjectPhysics(
     const glm::vec3& rayDir
 )
 {
-    if (!object.isStatic()) {
-        applyGravity(object, deltaTime);
-        applyXPBD(object, deltaTime, cameraPos, rayDir);
-        applyGroundCollision(object);
-        applyInvisibleBarrierCollision(object);
+    if (object.isStatic()) {
+        return;
     }
+
+    applyGravity(object, deltaTime);
+    applyXPBD(object, deltaTime, cameraPos, rayDir);
+    applyGroundCollision(object);
+    applyInvisibleBarrierCollision(object);
 }
 
 void Scene::updateObjectTransform(Object& object) {

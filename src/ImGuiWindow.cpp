@@ -194,7 +194,7 @@ void DebugWindow::displayXPBDParameters(
     bool& enableDistanceConstraints = scene.enableDistanceConstraints();
     ImGui::Checkbox("Enable Distance Constraints", &enableDistanceConstraints);
 
-    if (scene.getName() != "Test Scene 3") {
+    if (scene.getName() != "Cloth Sene") {
         bool& enableVolumeConstraints = scene.enableVolumeConstraints();
         ImGui::Checkbox("Enable Volume Constraints", &enableVolumeConstraints);
     }
