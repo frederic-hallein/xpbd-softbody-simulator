@@ -194,8 +194,10 @@ void DebugWindow::displayXPBDParameters(
     bool& enableDistanceConstraints = scene.enableDistanceConstraints();
     ImGui::Checkbox("Enable Distance Constraints", &enableDistanceConstraints);
 
-    bool& enableVolumeConstraints = scene.enableVolumeConstraints();
-    ImGui::Checkbox("Enable Volume Constraints", &enableVolumeConstraints);
+    if (scene.getName() != "Test Scene 3") {
+        bool& enableVolumeConstraints = scene.enableVolumeConstraints();
+        ImGui::Checkbox("Enable Volume Constraints", &enableVolumeConstraints);
+    }
 
     // bool& enableEnvCollisionConstraints = scene.enableEnvCollisionConstraints();
     // ImGui::Checkbox("Enable Collision Constraints", &enableEnvCollisionConstraints);
@@ -204,7 +206,6 @@ void DebugWindow::displayXPBDParameters(
 
     float& alpha = scene.getAlpha();
     float alpha_min = 0.0f;
-    if (scene.getName() == "Test Scene 2") alpha_min = 0.1f; // TODO: create icosphere with a lot of triangles
     float alpha_max = 1.0f;
     ImGui::Text("Compliance:");
     ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x - 1);

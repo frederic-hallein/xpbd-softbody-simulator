@@ -149,10 +149,10 @@ void PhysicsEngine::handleEvents() {
     }
 }
 
-void PhysicsEngine::processInput()
-{
-    if(glfwGetKey(m_window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+void PhysicsEngine::processInput() {
+    if(glfwGetKey(m_window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(m_window, true);
+    }
 
     Scene* scene = m_sceneManager->getCurrentScene();
     if (!scene) return;

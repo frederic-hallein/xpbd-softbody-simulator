@@ -12,14 +12,14 @@ Shader Object::s_faceNormalShader;
 std::unique_ptr<Camera> Scene::createCamera() {
     float aspectRatio = static_cast<float>(m_screenWidth) / static_cast<float>(m_screenHeight);
     return std::make_unique<Camera>(
-        glm::vec3(0.0f, 5.0f, 20.0f),
+        glm::vec3(0.0f, 28.0f, 71.0f),
         aspectRatio,
         m_window
     );
 }
 
 std::unique_ptr<Light> Scene::createLight() {
-    return std::make_unique<Light>(glm::vec3(0.0f, 20.0f, 0.0f));
+    return std::make_unique<Light>(glm::vec3(0.0f, 30.0f, 0.0f));
 }
 
 std::unique_ptr<Object> Scene::createObject(
@@ -721,7 +721,7 @@ void Scene::applyXPBD(
         }
 
         // Volume constraints
-        if (m_enableVolumeConstraints) {
+        if (m_enableVolumeConstraints && m_name != "Test Scene 3") {
             solveVolumeConstraints(
                 x,
                 posDiff,

@@ -1,19 +1,17 @@
 #include "logger.hpp"
 #include "PhysicsEngine.hpp"
 
-const int unsigned SCREEN_WIDTH = 1080;
-const int unsigned SCREEN_HEIGHT = 720;
+const unsigned int SCREEN_WIDTH = 1280;
+const unsigned int SCREEN_HEIGHT = 720;
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
     try {
         PhysicsEngine physicsEngine(
             "XPBD Softbody Implementation",
             SCREEN_WIDTH,
             SCREEN_HEIGHT
         );
-        while (physicsEngine.isRunning())
-        {
+        while (physicsEngine.isRunning()) {
             physicsEngine.handleEvents();
             physicsEngine.update();
             physicsEngine.render();

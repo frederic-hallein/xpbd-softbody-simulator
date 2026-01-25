@@ -1,5 +1,5 @@
 scene:
-  name: Test Scene 1
+  name: Test Scene 3
   objects:
     # Ground
     - name: Ground
@@ -13,14 +13,14 @@ scene:
       color: [0.816, 0.780, 0.737]
       isStatic: true
 
-    # # Towel
-    # - name: Towel
-    #   position: [0.0, 10.0, 0.0]
-    #   rotationAxis: [0.0, 0.0, 1.0]
-    #   rotationDeg: 180.0
-    #   scale: [1.0, 1.0, 1.0]
-    #   shader: dirtblock
-    #   mesh: towel
-    #   texture: ""
-    #   color: [1.0, 0.0, 0.0]
-    #   isStatic: false
+    # Cloth
+    - name: Cloth
+      position: [0.0, 10.0, 0.0]
+      rotationAxis: [1.0, 0.0, 0.0]
+      rotationDeg: 90.0
+      scale: [1.0, 1.0, 1.0]
+      shader: default
+      mesh: cloth
+      texture: ""
+      color: [1.0, 0.0, 0.0]
+      isStatic: false

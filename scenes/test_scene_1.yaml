@@ -209,3 +209,25 @@ scene:
       texture: ""
       color: [0.082, 0.365, 0.506]
       isStatic: false
+
+    - name: Block
+      position: [4.8, 22.2, -5.6]
+      rotationAxis: [0.3, 0.8, 0.5]
+      rotationDeg: 73.0
+      scale: [1.0, 1.0, 1.0]
+      shader: default
+      mesh: cube
+      texture: ""
+      color: [0.929, 0.443, 0.392]
+      isStatic: false
+
+    - name: Block
+      position: [-6.1, 25.7, 7.3]
+      rotationAxis: [0.7, 0.2, 0.6]
+      rotationDeg: 47.0
+      scale: [1.0, 1.0, 1.0]
+      shader: default
+      mesh: cube
+      texture: ""
+      color: [0.929, 0.443, 0.392]
+      isStatic: false
