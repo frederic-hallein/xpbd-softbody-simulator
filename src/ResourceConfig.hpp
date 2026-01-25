@@ -25,7 +25,7 @@ static constexpr std::array<std::tuple<std::string_view, std::string_view, std::
 static constexpr std::array<std::pair<std::string_view, std::string_view>, 4> MESH_DATA = {{
     {"surface", "surface.obj"},
     {"cube", "cube.obj"},
-    {"sphere", "torus.obj"},
+    {"sphere", "sphere.obj"},
     {"cloth", "cloth.obj"}
 }};
 

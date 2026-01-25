@@ -132,8 +132,6 @@ void Camera::scrollCallback(
 
     float scrollAmount = camera->m_scrollSpeed * camera->m_deltaTime;
     camera->setPosition(camera->getPosition() + camera->getFront() * static_cast<float>(yoffset) * scrollAmount);
-
-    // camera->setOrbit();
 }
 
 
