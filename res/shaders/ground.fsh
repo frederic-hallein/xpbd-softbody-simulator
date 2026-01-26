@@ -32,7 +32,7 @@ void main()
     vec3 result = (ambient + diffuse + specular) * objectColor;
 
     // Checkerboard pattern
-    float scale = 10.0; // Controls size of squares
+    float scale = 1.0; // Controls size of squares
     float checker = mod(floor(TexCoord.x * scale) + floor(TexCoord.y * scale), 2.0);
     vec3 checkerColor = mix(vec3(1.0), vec3(0.0), checker); // White and black
 

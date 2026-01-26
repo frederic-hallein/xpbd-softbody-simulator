@@ -1,7 +1,7 @@
 #include "Camera.hpp"
 
 const float MIN_PHI = glm::radians(0.5f);
-const float MAX_PHI = glm::radians(88.0f);
+const float MAX_PHI = glm::radians(86.0f);
 
 
 glm::mat4 Camera::getProjectionMatrix() const {
@@ -108,7 +108,7 @@ Camera::Camera(
       m_FOV(45.0f),
       m_aspectRatio(aspectRatio),
       m_nearPlane(0.1f),
-      m_farPlane(500.0f),
+      m_farPlane(300.0f),
       m_window(window),
       m_scrollSpeed(150.0f),
       m_mouseSensitivity(0.01),
@@ -131,7 +131,12 @@ void Camera::scrollCallback(
     if (!camera) return;
 
     float scrollAmount = camera->m_scrollSpeed * camera->m_deltaTime;
-    camera->setPosition(camera->getPosition() + camera->getFront() * static_cast<float>(yoffset) * scrollAmount);
+    camera->m_sphericalRadius -= static_cast<float>(yoffset) * scrollAmount;
+
+    if (camera->m_sphericalRadius > 180.0f) camera->m_sphericalRadius = 180.0f;
+    if (camera->m_sphericalRadius < 1.0f) camera->m_sphericalRadius = 1.0f;
+
+    camera->updateOrbit();
 }
 
 

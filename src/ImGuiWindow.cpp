@@ -165,7 +165,7 @@ void DebugWindow::displayExternalForces(
     if (ImGui::Button("Reset##Gravity")) {
         gravitationalAcceleration = glm::vec3(0.0f, 0.0f, 0.0f);
     }
-    ImGui::SliderFloat("##Gravity", &gravitationalAcceleration.y, -50.0f, 50.0f);
+    ImGui::SliderFloat("##Gravity", &gravitationalAcceleration.y, -10.0f, 10.0f);
     ImGui::PopItemWidth();
     ImGui::Separator();
 }
