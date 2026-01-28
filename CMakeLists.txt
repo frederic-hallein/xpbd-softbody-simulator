@@ -4,6 +4,10 @@ project(xpbd-softbody-simulator VERSION 1.0)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+if(CMAKE_BUILD_TYPE MATCHES Release)
+    add_compile_options(-O3 -march=native)
+endif()
+
 cmake_policy(SET CMP0074 NEW)
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
